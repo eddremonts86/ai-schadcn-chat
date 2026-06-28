@@ -1,0 +1,110 @@
+import type { Config } from "tailwindcss";
+
+// The ai-schadcn-chat package's components (ChatHeader, ChatComposer,
+// MessageBubble, Markdown, ThinkingDots, …) reference utility classes
+// like `bg-background`, `text-foreground`, `border-border`, plus the
+// keyframes `accordion-down`, `accordion-up`, `thinking-dot`, `fade-in`,
+// `slide-up`, and `caret-blink`. Those must be defined in the consumer's
+// Tailwind config — which is what this file does.
+const config: Config = {
+  darkMode: ["class"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
+    // Pull the package's source through Tailwind so utility classes used by
+    // ChatPanel/ChatComposer/MessageBubble/etc. get generated too.
+    "../src/**/*.{ts,tsx}",
+  ],
+  theme: {
+    container: {
+      center: true,
+      padding: "1rem",
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        chat: {
+          user: "hsl(var(--chat-user))",
+          assistant: "hsl(var(--chat-assistant))",
+          system: "hsl(var(--chat-system))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "thinking-dot": {
+          "0%, 60%, 100%": { opacity: "0.3", transform: "scale(0.85)" },
+          "30%": { opacity: "1", transform: "scale(1)" },
+        },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "caret-blink": {
+          "0%, 50%": { opacity: "1" },
+          "50.01%, 100%": { opacity: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "thinking-dot": "thinking-dot 1.4s ease-in-out infinite both",
+        "fade-in": "fade-in 200ms ease-out",
+        "slide-up": "slide-up 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "caret-blink": "caret-blink 1s step-end infinite",
+      },
+    },
+  },
+  // tailwindcss-animate is intentionally NOT included: the package doesn't
+  // actually rely on its classes, and excluding it keeps the bundle minimal.
+  plugins: [],
+};
+
+export default config;

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "resolvePackageJsonExports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "ai-schadcn-chat": ["./src/index.ts"],
+      "ai-schadcn-chat/hooks": ["./src/hooks/index.ts"],
+      "ai-schadcn-chat/providers": ["./src/providers/index.ts"],
+      "ai-schadcn-chat/lib": ["./src/lib/index.ts"],
+      "ai-schadcn-chat/types": ["./src/types/index.ts"],
+      "ai-schadcn-chat/components": ["./src/components/index.ts"]
+    }
+  },
+  "include": ["src", "demo", "scripts"],
+  "exclude": ["node_modules", "dist"]
+}
