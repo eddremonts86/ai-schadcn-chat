@@ -92,12 +92,39 @@ export class ChatEngine {
     return this.conversations.get(this.activeId)?.messages ?? [];
   }
 
+  /**
+   * Returns a shallow copy of the active conversation's messages,
+   * cached between `emit()` calls and only rebuilt when the engine
+   * signals a real change.
+   *
+   * Why this exists: React bindings consume this via `useSyncExternalStore`,
+   * which bails out when the snapshot reference is identical to the
+   * previous one (that's the contract). Because we mutate `messages`
+   * in place (`push`, etc.) the underlying array reference never changes
+   * — so the user bubble would never render. The fix is to cache a fresh
+   * copy between `emit()` calls and invalidate the cache when something
+   * actually changes. Returning a NEW array on every call would itself
+   * infinite-loop the snapshot.
+   */
+  private snapshotCache: ChatMessage[] = [];
+  private snapshotDirty = true;
+
+  public getMessagesSnapshot(): ChatMessage[] {
+    if (this.snapshotDirty) {
+      const msgs = this.conversations.get(this.activeId)?.messages;
+      this.snapshotCache = msgs ? [...msgs] : [];
+      this.snapshotDirty = false;
+    }
+    return this.snapshotCache;
+  }
+
   public subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
   private emit(): void {
+    this.snapshotDirty = true;
     for (const l of this.listeners) l();
   }
 

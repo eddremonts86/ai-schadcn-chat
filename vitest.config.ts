@@ -1,0 +1,36 @@
+/// <reference types="vitest" />
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import { resolve } from "node:path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "./src"),
+    },
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.ts"],
+    // Only collect explicit test files — avoid treating every .ts/.tsx in
+    // src/ as a test suite (which causes "No test suite found" failures).
+    include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+    exclude: [
+      "node_modules/**",
+      "dist/**",
+      "demo/**",
+      "tests/e2e/**",
+      "**/*.e2e.test.ts",
+      "**/*.e2e.test.tsx",
+    ],
+    css: false,
+    server: {
+      deps: {
+        // Make sure CJS-only deps used in tests are transformed by Vite.
+        inline: [/react-markdown/, /next-mdx-remote/, /remark-gfm/],
+      },
+    },
+  },
+});

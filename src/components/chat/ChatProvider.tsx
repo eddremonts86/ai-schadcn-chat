@@ -64,8 +64,8 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
 
   const messages = useSyncExternalStore(
     (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getMessages(),
-    () => engineRef.current!.getMessages(),
+    () => engineRef.current!.getMessagesSnapshot(),
+    () => engineRef.current!.getMessagesSnapshot(),
   );
   const config = useSyncExternalStore(
     (cb) => engineRef.current!.subscribe(cb),
@@ -79,8 +79,8 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
   );
   const isStreaming = useSyncExternalStore(
     (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getMessages().some((m: ChatMessage) => m.status === "streaming"),
-    () => engineRef.current!.getMessages().some((m: ChatMessage) => m.status === "streaming"),
+    () => engineRef.current!.getMessagesSnapshot().some((m: ChatMessage) => m.status === "streaming"),
+    () => engineRef.current!.getMessagesSnapshot().some((m: ChatMessage) => m.status === "streaming"),
   );
 
   const updateConfig = useCallback((partial: Partial<ChatConfig>) => {

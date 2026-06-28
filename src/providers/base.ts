@@ -289,6 +289,11 @@ function stripSsePrefix(raw: string, trimPrefix = "data:"): string {
       out.push(line.slice(trimPrefix.length).trimStart());
     } else if (line.startsWith(":")) {
       // SSE comment — skip.
+    } else if (line.startsWith("event:")) {
+      // SSE event id line (Anthropic sends these alongside `data:`) — skip
+      // so the JSON payload on the next line parses cleanly.
+    } else if (line.startsWith("id:") || line.startsWith("retry:")) {
+      // SSE metadata fields — skip.
     } else if (line.trim().length > 0) {
       out.push(line);
     }

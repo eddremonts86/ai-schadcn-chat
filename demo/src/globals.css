@@ -104,3 +104,425 @@
       "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * shadcn utilities (scroll-fade + shimmer)
+ *
+ * Vendored from https://github.com/shadcn-ui/ui/blob/main/packages/shadcn/src/tailwind.css
+ * and translated from Tailwind v4's `@utility`/`@theme inline` syntax to
+ * Tailwind v3 plain-CSS in `@layer utilities`. Each block preserves the
+ * original semantics (CSS custom properties, mask-image, animation-timeline
+ * feature-detect, @property registrations, reduced-motion overrides) so
+ * the helper classes are 1:1 with shadcn's published versions.
+ * ------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* Custom property registrations — these are part of the shadcn spec
+   * and let the browser interpolate the scroll-fade mask values
+   * smoothly between keyframes. */
+  @property --scroll-fade-t {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --scroll-fade-b {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --scroll-fade-s {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --scroll-fade-e {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --scroll-fade-mask {
+    syntax: "*";
+    inherits: false;
+  }
+  @property --shimmer-angle {
+    syntax: "<angle>";
+    inherits: true;
+    initial-value: 20deg;
+  }
+  @property --shimmer-image {
+    syntax: "*";
+    inherits: false;
+  }
+  @property --shimmer-text-fill {
+    syntax: "*";
+    inherits: false;
+  }
+
+  /* Custom variants — the AI shadcn components emit `data-state="open|closed"`
+   * on collapsible panels. Defining a `data-open`/`data-closed` variant lets
+   * utility classes like `data-open:opacity-100` work without the user
+   * having to add the same data-state selectors themselves. */
+  [data-state="open"] {
+    --data-open: 1;
+  }
+  [data-state="closed"] {
+    --data-closed: 1;
+  }
+  [data-state="checked"] {
+    --data-checked: 1;
+  }
+  [data-state="unchecked"] {
+    --data-unchecked: 1;
+  }
+  [data-state="active"] {
+    --data-active: 1;
+  }
+  [data-disabled="true"] {
+    --data-disabled: 1;
+  }
+  [data-orientation="horizontal"] {
+    --data-horizontal: 1;
+  }
+  [data-orientation="vertical"] {
+    --data-vertical: 1;
+  }
+  [data-selected="true"] {
+    --data-selected: 1;
+  }
+
+  /* Animations used by scroll-fade (mapped from the @theme inline block in
+   * shadcn's tailwind.css). */
+  @keyframes scroll-fade-reveal-t {
+    from {
+      --scroll-fade-t: 0px;
+    }
+    to {
+      --scroll-fade-t: var(
+        --_scroll-fade-size-t,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+      );
+    }
+  }
+  @keyframes scroll-fade-reveal-b {
+    from {
+      --scroll-fade-b: var(
+        --_scroll-fade-size-b,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+      );
+    }
+    to {
+      --scroll-fade-b: 0px;
+    }
+  }
+  @keyframes scroll-fade-reveal-s {
+    from {
+      --scroll-fade-s: 0px;
+    }
+    to {
+      --scroll-fade-s: var(
+        --_scroll-fade-size-s,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+      );
+    }
+  }
+  @keyframes scroll-fade-reveal-e {
+    from {
+      --scroll-fade-e: var(
+        --_scroll-fade-size-e,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+      );
+    }
+    to {
+      --scroll-fade-e: 0px;
+    }
+  }
+  @keyframes tw-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+
+  /* scrollbar utilities (the .no-scrollbar / .scrollbar-thin / .scrollbar-none
+   * variants used by the package's MessageScroller + ScrollArea fallbacks). */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.35);
+    border-radius: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  /* scroll-fade-y: vertical (top + bottom) fade — used by MessageScroller. */
+  .scroll-fade-y,
+  .scroll-fade {
+    --_scroll-fade-size-t: var(
+      --scroll-fade-t-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --_scroll-fade-size-b: var(
+      --scroll-fade-b-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --scroll-fade-block: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--scroll-fade-t, 0px),
+      #000 calc(100% - var(--scroll-fade-b, 0px)),
+      transparent 100%
+    );
+    -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+    mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-y,
+    .scroll-fade {
+      animation:
+        scroll-fade-reveal-t 1ms ease-in-out,
+        scroll-fade-reveal-b 1ms ease-in-out;
+      animation-timeline: scroll(self y), scroll(self y);
+      animation-range:
+        0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24)),
+        calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+          100%;
+      animation-fill-mode: both;
+    }
+  }
+  @supports not (animation-timeline: scroll()) {
+    .scroll-fade-y,
+    .scroll-fade {
+      --scroll-fade-t: var(--_scroll-fade-size-t);
+      --scroll-fade-b: var(--_scroll-fade-size-b);
+    }
+  }
+
+  /* scroll-fade-x: horizontal (start + end) fade. */
+  .scroll-fade-x {
+    --_scroll-fade-size-s: var(
+      --scroll-fade-s-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --_scroll-fade-size-e: var(
+      --scroll-fade-e-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --scroll-fade-inline: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--scroll-fade-s, 0px),
+      #000 calc(100% - var(--scroll-fade-e, 0px)),
+      transparent 100%
+    );
+    -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+    mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-x {
+      animation:
+        scroll-fade-reveal-s 1ms ease-in-out,
+        scroll-fade-reveal-e 1ms ease-in-out;
+      animation-timeline: scroll(self inline), scroll(self inline);
+      animation-range:
+        0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24)),
+        calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+          100%;
+      animation-fill-mode: both;
+    }
+  }
+  @supports not (animation-timeline: scroll()) {
+    .scroll-fade-x {
+      --scroll-fade-s: var(--_scroll-fade-size-s);
+      --scroll-fade-e: var(--_scroll-fade-size-e);
+    }
+  }
+
+  /* scroll-fade-b: bottom-only fade. */
+  .scroll-fade-b {
+    --_scroll-fade-size-b: var(
+      --scroll-fade-b-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --scroll-fade-mask: linear-gradient(
+      to bottom,
+      #000 0,
+      #000 calc(100% - var(--scroll-fade-b, 0px)),
+      transparent 100%
+    );
+    -webkit-mask-image: var(--scroll-fade-mask);
+    mask-image: var(--scroll-fade-mask);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-b {
+      animation: scroll-fade-reveal-b 1ms ease-in-out;
+      animation-timeline: scroll(self y);
+      animation-range: calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+        100%;
+      animation-fill-mode: both;
+    }
+  }
+  @supports not (animation-timeline: scroll()) {
+    .scroll-fade-b {
+      --scroll-fade-b: var(--_scroll-fade-size-b);
+    }
+  }
+
+  /* scroll-fade-l: left (start) fade. */
+  .scroll-fade-l {
+    --_scroll-fade-size-s: var(
+      --scroll-fade-s-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --scroll-fade-mask: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--scroll-fade-s, 0px),
+      #000 100%
+    );
+    -webkit-mask-image: var(--scroll-fade-mask);
+    mask-image: var(--scroll-fade-mask);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-l {
+      animation: scroll-fade-reveal-s 1ms ease-in-out;
+      animation-timeline: scroll(self x);
+      animation-range: 0
+        var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24));
+      animation-fill-mode: both;
+    }
+  }
+  @supports not (animation-timeline: scroll()) {
+    .scroll-fade-l {
+      --scroll-fade-s: var(--_scroll-fade-size-s);
+    }
+  }
+
+  /* scroll-fade-r: right (end) fade. */
+  .scroll-fade-r {
+    --_scroll-fade-size-e: var(
+      --scroll-fade-e-size,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+    --scroll-fade-mask: linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(100% - var(--scroll-fade-e, 0px)),
+      transparent 100%
+    );
+    -webkit-mask-image: var(--scroll-fade-mask);
+    mask-image: var(--scroll-fade-mask);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-r {
+      animation: scroll-fade-reveal-e 1ms ease-in-out;
+      animation-timeline: scroll(self x);
+      animation-range: calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+        100%;
+      animation-fill-mode: both;
+    }
+  }
+  @supports not (animation-timeline: scroll()) {
+    .scroll-fade-r {
+      --scroll-fade-e: var(--_scroll-fade-size-e);
+    }
+  }
+
+  /* shimmer: animated gradient text effect. The shadcn util uses
+   * `oklch(from currentColor …)` color-mix; if the browser doesn't
+   * support relative color syntax, the var() falls back to currentColor
+   * (still animated, just less colorful). */
+  .shimmer {
+    --_spread: var(--shimmer-spread, calc(3ch + 40px));
+    --_base: currentColor;
+    --_highlight: var(
+      --shimmer-color,
+      oklch(from currentColor l c h / calc(alpha * 0.2))
+    );
+    background-image: var(
+      --shimmer-image,
+      linear-gradient(
+        calc(90deg + var(--shimmer-angle)),
+        var(--_base) calc(50% - var(--_spread)),
+        color-mix(in oklch, var(--_highlight), var(--_base) 50%)
+          calc(50% - var(--_spread) * 0.5),
+        var(--_highlight) 50%,
+        color-mix(in oklch, var(--_highlight), var(--_base) 50%)
+          calc(50% + var(--_spread) * 0.5),
+        var(--_base) calc(50% + var(--_spread))
+      )
+    );
+    background-repeat: no-repeat;
+    background-size: calc(200% + var(--_spread) * 2) 100%;
+    background-position: 0 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--shimmer-text-fill, transparent);
+    animation: tw-shimmer var(--shimmer-duration, 2s) linear infinite;
+  }
+  .dark .shimmer {
+    --_highlight: var(
+      --shimmer-color,
+      oklch(
+        from currentColor max(0.8, calc(l + 0.4)) c h / calc(alpha + 0.4)
+      )
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}

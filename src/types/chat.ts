@@ -183,6 +183,8 @@ export interface AttachmentMeta {
   id: string;
   name: string;
   mimeType: string;
+  /** Optional short alias for mimeType used by some components. */
+  mime?: string;
   size: number;
   /** Inline base64. Use only for small files; large files should be uploaded externally and stored as URL. */
   dataUrl?: string;
