@@ -3,7 +3,7 @@
  * for long conversations. Auto-scrolls to the bottom on new content
  * (unless the user has scrolled up to read history).
  */
-import { useEffect, useLayoutEffect, useRef, type ReactNode, type UIEvent } from "react";
+import { useEffect, useRef, type ReactNode, type UIEvent } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useChat } from "../../hooks/useChat.js";
 import { MessageBubble } from "./MessageBubble.js";
@@ -41,10 +41,10 @@ export function MessageList({ className }: MessageListProps) {
     virtualizer.scrollToIndex(messages.length - 1, { align: "end" });
   }, [messages.length, virtualizer]);
 
-  useLayoutEffect(() => {
-    if (!stickToBottomRef.current) return;
-    virtualizer.measure();
-  });
+  // Note: dynamic measurement is handled by the `measureElement` callback
+  // passed to useVirtualizer above. Calling `virtualizer.measure()` from a
+  // layout effect creates an infinite update loop (measure → setState →
+  // re-render → effect → measure...) so we deliberately omit that hook.
 
   if (messages.length === 0) {
     return (
