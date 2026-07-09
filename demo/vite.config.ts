@@ -33,6 +33,16 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
+    // Proxy local LLM servers so the browser talks to the same origin and
+    // never hits CORS. The LM Studio provider uses baseUrl `/lmstudio/v1`,
+    // which Vite forwards to the real server below (server-to-server).
+    proxy: {
+      "/lmstudio": {
+        target: "http://127.0.0.1:1234",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/lmstudio/, ""),
+      },
+    },
   },
   preview: {
     host: "0.0.0.0",

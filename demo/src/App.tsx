@@ -1,6 +1,14 @@
-import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
+import {
+  ChatPanel,
+  defaultConfig,
+  deleteProvider,
+  listProviders,
+  saveProvider,
+  seedProviders,
+  setActiveProviderId,
+} from "ai-schadcn-chat";
 import type { ChatConfig } from "ai-schadcn-chat";
-import type { ReactElement } from "react";
+import { useEffect, type ReactElement } from "react";
 
 // The package's defaultConfig() reads MINIMAX_API_KEY / MINIMAX_BASE_URL /
 // MINIMAX_MODEL from import.meta.env. We populate VITE_-prefixed copies in
@@ -61,6 +69,18 @@ export default function App(): ReactElement {
       tone: "friendly",
       locale: "en",
     },
+    ui: {
+      title: "Coding buddy",
+      // No fixed subtitle — the header shows the live model automatically.
+      placeholder: "Ask anything, or paste some code…",
+      greeting: "Hey Edd — what are we building?",
+      suggestions: [
+        "Explain async/await like I'm five",
+        "Review this React component for bugs",
+        "Write a SQL query with a CTE",
+        "Refactor this function to be pure",
+      ],
+    },
     documents: [
       {
         id: "demo-doc",
@@ -89,38 +109,45 @@ export default function App(): ReactElement {
     };
   }
 
-  const keyTail = apiKey ? apiKey.slice(-6) : "MISSING";
-  const keyLoaded = apiKey.length > 0;
+  // Make the env-configured MiniMax provider show up as "configured" in the
+  // provider manager: seed its API key + base URL and mark it active so the
+  // model switcher and manager match the live config out of the box.
+  useEffect(() => {
+    if (!apiKey) return;
+    const mm = listProviders().find((p) => p.id === "seed:minimax");
+    if (mm && !mm.apiKey) {
+      saveProvider({
+        ...mm,
+        apiKey,
+        baseUrl: envVar(ENV_BASE) ?? mm.baseUrl,
+      });
+      setActiveProviderId("seed:minimax");
+    }
+  }, [apiKey]);
+
+  // Collapse any LM Studio duplicates (from earlier sessions) into a single
+  // canonical entry pointing at the Vite proxy path (`/lmstudio/v1`) so the
+  // browser stays same-origin and avoids CORS. Idempotent.
+  useEffect(() => {
+    const PROXIED = "/lmstudio/v1";
+    const base = seedProviders().find((p) => p.id === "seed:lmstudio");
+    if (!base) return;
+    const lms = listProviders().filter((p) => p.name === base.name);
+    const ok =
+      lms.length === 1 &&
+      lms[0].id === "seed:lmstudio" &&
+      lms[0].baseUrl === PROXIED;
+    if (ok) return;
+    lms.forEach((p) => deleteProvider(p.id));
+    saveProvider({ ...base, id: "seed:lmstudio", baseUrl: PROXIED });
+  }, []);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-card px-4 py-2 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-foreground">ai-schadcn-chat</span>
-          <span>·</span>
-          <span>MiniMax demo</span>
-          <span>·</span>
-          <span>model: {cfg.model.id}</span>
-          <span>·</span>
-          <span>baseUrl: {cfg.provider.baseUrl}</span>
+    <div className="app-mesh flex h-screen w-screen flex-col overflow-hidden text-foreground">
+      <main className="flex min-h-0 flex-1 justify-center p-3 sm:p-6">
+        <div className="flex min-h-0 w-full max-w-5xl flex-1">
+          <ChatPanel config={cfg} layout="panel" className="shadow-2xl" />
         </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={
-              keyLoaded
-                ? "rounded bg-emerald-500/15 px-2 py-0.5 text-emerald-700 dark:text-emerald-300"
-                : "rounded bg-destructive/15 px-2 py-0.5 text-destructive"
-            }
-          >
-            API key: {keyLoaded ? "loaded" : "missing"}
-          </span>
-          <code className="rounded bg-muted px-2 py-0.5 font-mono text-[10px]">
-            …{keyTail}
-          </code>
-        </div>
-      </header>
-      <main className="min-h-0 flex-1">
-        <ChatPanel config={cfg} layout="fullpage" />
       </main>
     </div>
   );

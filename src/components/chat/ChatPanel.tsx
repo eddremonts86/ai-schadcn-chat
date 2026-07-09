@@ -49,10 +49,10 @@ export function ChatPanel(props: ChatPanelProps) {
 
   const containerClasses =
     layout === "floating"
-      ? "fixed bottom-4 right-4 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-2rem))] rounded-2xl border bg-background shadow-2xl"
+      ? "fixed bottom-5 right-5 z-40 flex w-[min(420px,calc(100vw-2.5rem))] h-[min(660px,calc(100vh-2.5rem))] flex-col overflow-hidden rounded-2xl surface-elevated app-mesh"
       : layout === "fullpage"
-      ? "flex h-full w-full flex-col bg-background"
-      : "flex h-full w-full flex-col overflow-hidden rounded-xl border bg-background";
+        ? "flex h-full w-full flex-col app-mesh"
+        : "flex h-full w-full flex-col overflow-hidden rounded-2xl surface-elevated app-mesh";
 
   return (
     <ChatProvider config={config}>

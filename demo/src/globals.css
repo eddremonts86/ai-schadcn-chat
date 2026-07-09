@@ -12,75 +12,92 @@
  */
 
 @layer base {
+  /*
+   * Palette — OKLCH "violet/indigo, vibrant with depth".
+   * Each var holds a bare `L C H` triple so Tailwind can compose alpha via
+   * `oklch(var(--token) / <alpha-value>)`. Hue 285 (indigo-violet) carries
+   * the whole identity; neutrals are tinted toward it instead of pure gray.
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0.99 0.004 285;
+    --foreground: 0.21 0.03 285;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 1 0 0;
+    --card-foreground: 0.21 0.03 285;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 1 0 0;
+    --popover-foreground: 0.21 0.03 285;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0.56 0.225 280;
+    --primary-foreground: 0.99 0.01 280;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0.965 0.012 285;
+    --secondary-foreground: 0.30 0.03 285;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0.965 0.008 285;
+    --muted-foreground: 0.515 0.025 285;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0.95 0.022 285;
+    --accent-foreground: 0.30 0.04 285;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0.585 0.22 25;
+    --destructive-foreground: 0.99 0.01 25;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 0.62 0.16 155;
 
-    --radius: 0.5rem;
+    --border: 0.91 0.012 285;
+    --input: 0.91 0.012 285;
+    --ring: 0.56 0.225 280;
 
-    /* Chat-specific tokens used by the package's ChatHeader / MessageBubble etc. */
-    --chat-user: 217 91% 60%;
-    --chat-assistant: 240 5% 96%;
-    --chat-system: 38 92% 50%;
+    --radius: 0.9rem;
+
+    /* Accent ramp used by gradients / glows. */
+    --primary-2: 0.58 0.20 320; /* magenta-violet partner for gradients */
+    --glow: 0.60 0.22 285;
+
+    /* Chat-specific tokens. */
+    --chat-user: 0.56 0.225 280;
+    --chat-assistant: 1 0 0;
+    --chat-system: 0.75 0.16 70;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0.165 0.018 285;
+    --foreground: 0.96 0.008 285;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0.205 0.022 285;
+    --card-foreground: 0.96 0.008 285;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0.205 0.024 285;
+    --popover-foreground: 0.96 0.008 285;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0.66 0.205 280;
+    --primary-foreground: 0.16 0.02 285;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0.26 0.028 285;
+    --secondary-foreground: 0.96 0.008 285;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0.25 0.025 285;
+    --muted-foreground: 0.72 0.02 285;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0.31 0.04 285;
+    --accent-foreground: 0.97 0.01 285;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0.64 0.20 25;
+    --destructive-foreground: 0.98 0.01 25;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --success: 0.70 0.16 155;
 
-    --chat-user: 217 91% 60%;
-    --chat-assistant: 217.2 32.6% 17.5%;
-    --chat-system: 38 92% 50%;
+    --border: 0.30 0.03 285;
+    --input: 0.30 0.03 285;
+    --ring: 0.66 0.205 280;
+
+    --primary-2: 0.64 0.19 320;
+    --glow: 0.66 0.22 285;
+
+    --chat-user: 0.66 0.205 280;
+    --chat-assistant: 0.205 0.022 285;
+    --chat-system: 0.78 0.15 70;
   }
 }
 
@@ -100,9 +117,230 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-family: "Inter var", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans", sans-serif;
+    font-feature-settings: "cv11", "ss01";
+    font-optical-sizing: auto;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Depth layer — the "vibrant with depth" register.
+ *
+ * A subtle multi-bloom radial mesh sits behind the whole app; elevated
+ * surfaces (panel, composer, bubbles) layer soft violet-tinted shadows and
+ * the primary action carries an actual glow. None of this is decorative for
+ * its own sake — it builds the spatial hierarchy the chat reads through.
+ * ------------------------------------------------------------------------- */
+@layer utilities {
+  .app-mesh {
+    background-color: oklch(var(--background));
+    background-image:
+      radial-gradient(
+        ellipse 70% 55% at 12% -8%,
+        oklch(var(--primary) / 0.12),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 55% 50% at 105% 8%,
+        oklch(var(--primary-2) / 0.1),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 45% at 50% 115%,
+        oklch(var(--primary) / 0.07),
+        transparent 60%
+      );
+    background-attachment: fixed;
+  }
+  .dark .app-mesh {
+    background-image:
+      radial-gradient(
+        ellipse 70% 55% at 12% -8%,
+        oklch(var(--primary) / 0.2),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 55% 50% at 105% 8%,
+        oklch(var(--primary-2) / 0.16),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 45% at 50% 115%,
+        oklch(var(--primary) / 0.12),
+        transparent 60%
+      );
+  }
+
+  /* Elevated content surface — border + layered, hue-tinted shadow. */
+  .surface-elevated {
+    background-color: oklch(var(--card));
+    border: 1px solid oklch(var(--border) / 0.7);
+    box-shadow:
+      0 1px 2px oklch(var(--foreground) / 0.04),
+      0 12px 32px -12px oklch(var(--primary) / 0.18);
+  }
+  .dark .surface-elevated {
+    border-color: oklch(1 0 0 / 0.08);
+    box-shadow:
+      0 1px 2px oklch(0 0 0 / 0.4),
+      0 16px 40px -16px oklch(var(--primary) / 0.3);
+  }
+
+  /* Brand-tinted sibling of surface-elevated — used for the user's own
+   * messages so they harmonize with the assistant card instead of shouting. */
+  .surface-tinted {
+    background-color: oklch(var(--primary) / 0.1);
+    border: 1px solid oklch(var(--primary) / 0.22);
+    box-shadow:
+      0 1px 2px oklch(var(--foreground) / 0.04),
+      0 12px 32px -14px oklch(var(--primary) / 0.2);
+  }
+  .dark .surface-tinted {
+    background-color: oklch(var(--primary) / 0.18);
+    border-color: oklch(var(--primary) / 0.3);
+    box-shadow:
+      0 1px 2px oklch(0 0 0 / 0.4),
+      0 16px 40px -18px oklch(var(--primary) / 0.35);
+  }
+
+  /* The brand gradient — used on the user bubble + primary action. */
+  .grad-primary {
+    background-image: linear-gradient(
+      135deg,
+      oklch(var(--primary)),
+      oklch(var(--primary-2))
+    );
+  }
+
+  /* Glow halo for the primary action / live states. */
+  .glow-primary {
+    box-shadow:
+      0 6px 16px -6px oklch(var(--glow) / 0.55),
+      0 2px 6px -2px oklch(var(--glow) / 0.4);
+  }
+  .glow-primary-strong {
+    box-shadow:
+      0 0 0 1px oklch(var(--primary) / 0.4),
+      0 8px 28px -6px oklch(var(--glow) / 0.7);
+  }
+
+  /* Animated conic ring used around the assistant avatar while streaming. */
+  .ring-conic {
+    background: conic-gradient(
+      from var(--ring-angle, 0deg),
+      oklch(var(--primary)),
+      oklch(var(--primary-2)),
+      oklch(var(--primary))
+    );
+    animation: ring-spin 2.4s linear infinite;
+  }
+
+  /* Message entrance. */
+  .animate-message-in {
+    animation: message-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes ring-spin {
+  to {
+    --ring-angle: 360deg;
+  }
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-message-in,
+  .ring-conic {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * highlight.js token theme — tuned for the dark code surface used by the
+ * Markdown code block (always dark, violet-leaning accents). Compact subset
+ * of the common token classes rehype-highlight emits.
+ * ------------------------------------------------------------------------- */
+.hljs {
+  color: oklch(0.92 0.01 285);
+  background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+  color: oklch(0.6 0.02 285);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-type,
+.hljs-name {
+  color: oklch(0.78 0.16 320);
+}
+.hljs-string,
+.hljs-meta-string,
+.hljs-regexp,
+.hljs-addition {
+  color: oklch(0.82 0.15 150);
+}
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-attr,
+.hljs-template-variable,
+.hljs-variable {
+  color: oklch(0.84 0.13 70);
+}
+.hljs-title,
+.hljs-section,
+.hljs-function .hljs-title,
+.hljs-built_in {
+  color: oklch(0.82 0.15 250);
+}
+.hljs-attribute,
+.hljs-tag,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: oklch(0.8 0.16 20);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+.hljs-deletion {
+  color: oklch(0.72 0.18 25);
 }
 
 /* ---------------------------------------------------------------------------

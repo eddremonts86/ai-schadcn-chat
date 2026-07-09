@@ -12,6 +12,7 @@ import type {
   AttachmentMeta,
   ChatConfig,
   ChatMessage,
+  ConversationMeta,
 } from "../../types/chat.js";
 import { ChatEngine as ChatEngineImpl } from "../../lib/chat-engine.js";
 import { buildDefaultMiniMaxConfig } from "../../types/presets.js";
@@ -31,8 +32,10 @@ export interface ChatContextValue {
   editAndResend: (messageId: string, newContent: string) => Promise<void>;
   clear: () => void;
   newConversation: () => string;
+  deleteMessage: (messageId: string) => void;
   deleteConversation: (id: string) => void;
   listConversations: () => string[];
+  listConversationsMeta: () => ConversationMeta[];
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -62,25 +65,50 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
     engineRef.current.updateConfig(props.config);
   }
 
-  const messages = useSyncExternalStore(
-    (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getMessagesSnapshot(),
-    () => engineRef.current!.getMessagesSnapshot(),
+  // useSyncExternalStore requires the subscribe callback to be stable
+  // across renders — otherwise React tears down + recreates the
+  // subscription on every render and emits are lost. Memoize once
+  // against the engineRef, which itself is stable for the provider's
+  // lifetime.
+  const subscribe = useCallback(
+    (cb: () => void) => engineRef.current!.subscribe(cb),
+    [],
   );
+  const getMessages = useCallback(
+    () => engineRef.current!.getMessagesSnapshot(),
+    [],
+  );
+  const getConfigSnapshot = useCallback(
+    () => engineRef.current!.getConfig(),
+    [],
+  );
+  const getActiveConversationId = useCallback(
+    () => engineRef.current!.getActiveConversationId(),
+    [],
+  );
+  const getIsStreaming = useCallback(
+    () =>
+      engineRef.current!
+        .getMessagesSnapshot()
+        .some((m: ChatMessage) => m.status === "streaming"),
+    [],
+  );
+
+  const messages = useSyncExternalStore(subscribe, getMessages, getMessages);
   const config = useSyncExternalStore(
-    (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getConfig(),
-    () => engineRef.current!.getConfig(),
+    subscribe,
+    getConfigSnapshot,
+    getConfigSnapshot,
   );
   const conversationId = useSyncExternalStore(
-    (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getActiveConversationId(),
-    () => engineRef.current!.getActiveConversationId(),
+    subscribe,
+    getActiveConversationId,
+    getActiveConversationId,
   );
   const isStreaming = useSyncExternalStore(
-    (cb) => engineRef.current!.subscribe(cb),
-    () => engineRef.current!.getMessagesSnapshot().some((m: ChatMessage) => m.status === "streaming"),
-    () => engineRef.current!.getMessagesSnapshot().some((m: ChatMessage) => m.status === "streaming"),
+    subscribe,
+    getIsStreaming,
+    getIsStreaming,
   );
 
   const updateConfig = useCallback((partial: Partial<ChatConfig>) => {
@@ -107,10 +135,17 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
   );
   const clear = useCallback(() => engineRef.current!.clear(), []);
   const newConversation = useCallback(() => engineRef.current!.newConversation(), []);
+  const deleteMessage = useCallback((messageId: string) => {
+    engineRef.current!.deleteMessage(messageId);
+  }, []);
   const deleteConversation = useCallback((id: string) => {
     engineRef.current!.deleteConversation(id);
   }, []);
   const listConversations = useCallback(() => engineRef.current!.listConversationIds(), []);
+  const listConversationsMeta = useCallback(
+    () => engineRef.current!.listConversationsMeta(),
+    [],
+  );
 
   const value = useMemo<ChatContextValue>(
     () => ({
@@ -128,8 +163,10 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
       editAndResend,
       clear,
       newConversation,
+      deleteMessage,
       deleteConversation,
       listConversations,
+      listConversationsMeta,
     }),
     [
       config,
@@ -145,8 +182,10 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
       editAndResend,
       clear,
       newConversation,
+      deleteMessage,
       deleteConversation,
       listConversations,
+      listConversationsMeta,
     ],
   );
 

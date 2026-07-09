@@ -4,6 +4,7 @@ import type {
   ChatError,
   ChatMessage,
   ChatResponseChunk,
+  ConversationMeta,
   ProviderAdapter,
   Role,
   ToolCallRecord,
@@ -18,7 +19,12 @@ import {
   uid,
 } from "./utils.js";
 import { filesToAttachments, serializeUserContent } from "./attachments.js";
-import { loadConversation, saveConversation, trimPersisted } from "./persistence.js";
+import {
+  listConversations as listPersistedConversations,
+  loadConversation,
+  saveConversation,
+  trimPersisted,
+} from "./persistence.js";
 import { toChatError } from "../providers/base.js";
 
 /**
@@ -75,17 +81,48 @@ export class ChatEngine {
   }
 
   public setActiveConversationId(id: string): void {
-    if (this.conversations.has(id)) {
-      this.activeId = id;
-    } else {
-      this.conversations.set(id, { id, messages: [] });
-      this.activeId = id;
+    if (!this.conversations.has(id)) {
+      // Hydrate from persistence when switching to a stored conversation
+      // that isn't in memory yet; otherwise start a fresh empty one.
+      const persisted = this.config.persistKey ? loadConversation(id) : null;
+      this.conversations.set(id, { id, messages: persisted?.messages ?? [] });
     }
+    this.activeId = id;
     this.emit();
   }
 
   public listConversationIds(): string[] {
     return Array.from(this.conversations.keys());
+  }
+
+  /**
+   * Rich conversation list for history menus: a title (first user message),
+   * last-updated timestamp, and message count. Merges in-memory conversations
+   * with persisted ones (persisted wins for title/timestamp). Sorted newest
+   * first; the active conversation is always present.
+   */
+  public listConversationsMeta(): ConversationMeta[] {
+    const metas = new Map<string, ConversationMeta>();
+    for (const conv of this.conversations.values()) {
+      metas.set(conv.id, {
+        id: conv.id,
+        title: deriveTitle(conv.messages),
+        updatedAt: 0,
+        messageCount: conv.messages.length,
+      });
+    }
+    if (this.config.persistKey) {
+      for (const p of listPersistedConversations()) {
+        const existing = metas.get(p.id);
+        metas.set(p.id, {
+          id: p.id,
+          title: p.title || existing?.title || "New chat",
+          updatedAt: p.updatedAt,
+          messageCount: p.messages.length,
+        });
+      }
+    }
+    return Array.from(metas.values()).sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
   public getMessages(): ChatMessage[] {
@@ -171,6 +208,15 @@ export class ChatEngine {
     this.persist();
     this.emit();
     return id;
+  }
+
+  /** Public: remove a single message from the active conversation. */
+  public deleteMessage(messageId: string): void {
+    const conv = this.conversations.get(this.activeId);
+    if (!conv) return;
+    conv.messages = conv.messages.filter((m) => m.id !== messageId);
+    this.persist();
+    this.emit();
   }
 
   public deleteConversation(id: string): void {
@@ -336,6 +382,7 @@ export class ChatEngine {
 
         if (finished) {
           assistantMsg.status = "complete";
+          assistantMsg.completedAt = Date.now();
           if (finalUsage) assistantMsg.usage = finalUsage;
           if (model) assistantMsg.model = model;
           break;
@@ -379,6 +426,7 @@ export class ChatEngine {
       { id: string; name: string; arguments: Record<string, unknown> | string; raw: string }
     >();
     let buffer = "";
+    let reasoningBuffer = "";
     let finishReason: ChatResponseChunk["finishReason"];
     let finalUsage: ChatMessage["usage"];
     let finalModel: string | undefined;
@@ -404,9 +452,14 @@ export class ChatEngine {
       if (chunk.usage) finalUsage = chunk.usage;
       if (chunk.finishReason) finishReason = chunk.finishReason;
       if (chunk.delta) {
-        const cleaned = chunk.delta.replace(/\u0000think:[^\n]*\n?/g, "");
-        buffer += cleaned;
-        assistantMsg.content = buffer;
+        if (!assistantMsg.startedAt) assistantMsg.startedAt = Date.now();
+        if (chunk.delta.startsWith("\u0000think:")) {
+          reasoningBuffer += chunk.delta.slice("\u0000think:".length);
+          assistantMsg.reasoning = reasoningBuffer;
+        } else {
+          buffer += chunk.delta;
+          assistantMsg.content = buffer;
+        }
         this.emit();
       }
       if (chunk.toolCall) {
@@ -477,4 +530,29 @@ interface ConversationState {
 
 function truncate(text: string, max: number): string {
   return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
+}
+
+/** Derive a human title from the first user message (ignores JSON markers). */
+function deriveTitle(messages: ChatMessage[]): string {
+  const first = messages.find((m) => m.role === "user");
+  if (!first) return "New chat";
+  let content = first.content;
+  if (content.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(content) as {
+        __type?: string;
+        blocks?: { type?: string; text?: string }[];
+      };
+      if (parsed?.__type === "ai-chat-blocks") {
+        content =
+          parsed.blocks
+            ?.map((b) => (b.type === "text" ? (b.text ?? "") : ""))
+            .filter(Boolean)
+            .join(" ") || "Attachment";
+      }
+    } catch {
+      /* keep raw */
+    }
+  }
+  return truncate(content.replace(/[\n\r]+/g, " ").trim(), 60) || "New chat";
 }

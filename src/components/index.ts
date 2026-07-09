@@ -20,6 +20,10 @@ export * from "./ui/dialog.js";
 export * from "./ui/separator.js";
 export * from "./ui/badge.js";
 export * from "./ui/tabs.js";
+export * from "./ui/select.js";
+export * from "./ui/label.js";
+export * from "./ui/checkbox.js";
+export * from "./ui/collapsible.js";
 
 // Chat provider + layout primitives.
 export * from "./chat/ChatProvider.js";
@@ -81,3 +85,9 @@ export {
 export { MessageInput } from "./chat/MessageInput.js";
 export { ChatComposer } from "./chat/ChatComposer.js";
 export { MessageList } from "./chat/MessageList.js";
+export { ThemeToggle } from "./chat/ThemeToggle.js";
+export { Markdown } from "./chat/Markdown.js";
+export { AttachmentPreview } from "./chat/AttachmentPreview.js";
+export { AgentManager } from "./chat/AgentManager.js";
+export { ProviderManager } from "./chat/ProviderManager.js";
+export { ReasoningPanel } from "./chat/ReasoningPanel.js";

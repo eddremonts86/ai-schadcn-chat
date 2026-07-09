@@ -109,6 +109,33 @@ export function attachmentIcon(mimeType: string): string {
 }
 
 /**
+ * Extract the human-readable text from a message's `content`. When the
+ * content is the internal `ai-chat-blocks` JSON marker (used when a turn
+ * carries attachments), the text blocks are concatenated and the binary
+ * image/file blocks are dropped — so the UI never renders raw JSON. Plain
+ * content is returned unchanged.
+ */
+export function extractMessageText(content: string): string {
+  if (!content.startsWith("{")) return content;
+  try {
+    const parsed = JSON.parse(content) as {
+      __type?: string;
+      blocks?: { type?: string; text?: string }[];
+    };
+    if (parsed?.__type === "ai-chat-blocks" && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((b) => (b.type === "text" && typeof b.text === "string" ? b.text : ""))
+        .filter(Boolean)
+        .join("\n")
+        .trim();
+    }
+  } catch {
+    /* fall through — not a blocks marker */
+  }
+  return content;
+}
+
+/**
  * Reconstruct a plain-text representation of a user message:
  * strips the JSON marker, surfaces attachment names, and returns the
  * raw text the user typed. Used by the on-screen header.

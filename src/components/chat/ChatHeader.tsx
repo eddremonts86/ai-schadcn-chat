@@ -1,23 +1,28 @@
 /**
- * Chat header with model + personality + documents menu, conversation
- * list, theme toggle, and a clear/reset button.
+ * Chat header — brand mark, title/subtitle, and the control cluster
+ * (personality, context documents, conversation history, theme toggle,
+ * overflow). Rendered on a translucent, blurred bar that floats above the
+ * message stream.
  */
 import {
-  Bot,
-  Brain,
+  Check,
   ChevronDown,
   FileText,
-  MessageSquare,
+  History,
+  MessageSquarePlus,
   MoreHorizontal,
   Plus,
+  Settings2,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { useChat } from "../../hooks/useChat.js";
 import {
-  defaultPersonalityPresets,
-  defaultSystemPresets,
-} from "../../types/presets.js";
+  getActiveAgentId,
+  listAgents,
+  setActiveAgentId,
+} from "../../lib/agents.js";
 import { Badge } from "../ui/badge.js";
 import { Button } from "../ui/button.js";
 import {
@@ -28,8 +33,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu.js";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../ui/tooltip.js";
+import { AgentManager } from "./AgentManager.js";
+import { ThemeToggle } from "./ThemeToggle.js";
 import { cn } from "../../lib/utils.js";
-import type { PersonalityConfig, PromptDocument } from "../../types/chat.js";
+import type { Agent, PromptDocument } from "../../types/chat.js";
 
 export interface ChatHeaderProps {
   className?: string;
@@ -39,16 +51,46 @@ export function ChatHeader({ className }: ChatHeaderProps) {
   const chat = useChat();
   const cfg = chat.config;
   const ui = cfg.ui ?? {};
-  const [personalityOpen, setPersonalityOpen] = useState(false);
+  const [agentsOpen, setAgentsOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [managerOpen, setManagerOpen] = useState(false);
+  const [managerCreate, setManagerCreate] = useState(false);
+  const [activeAgentId, setActiveAgent] = useState<string | null>(() =>
+    getActiveAgentId(),
+  );
 
-  const applyPersonality = (preset: PersonalityConfig) => {
-    chat.updateConfig({ personality: { ...cfg.personality, ...preset } });
-    setPersonalityOpen(false);
+  const agents = listAgents();
+  const activeAgent =
+    agents.find((a) => a.id === activeAgentId) ??
+    agents.find((a) => a.name === cfg.personality?.name);
+
+  const applyAgent = (agent: Agent) => {
+    chat.updateConfig({
+      systemPrompt: agent.systemPrompt,
+      personality: {
+        ...cfg.personality,
+        name: agent.name,
+        tone: agent.tone,
+        avatar: agent.icon,
+        ...(agent.locale ? { locale: agent.locale } : {}),
+      },
+      ui: {
+        ...ui,
+        title: agent.name,
+        ...(agent.suggestions && agent.suggestions.length > 0
+          ? { suggestions: agent.suggestions }
+          : {}),
+      },
+    });
+    setActiveAgentId(agent.id);
+    setActiveAgent(agent.id);
+    setAgentsOpen(false);
   };
 
-  const applySystem = (key: keyof typeof defaultSystemPresets) => {
-    chat.updateConfig({ systemPrompt: defaultSystemPresets[key] });
+  const openManager = (create: boolean) => {
+    setManagerCreate(create);
+    setManagerOpen(true);
+    setAgentsOpen(false);
   };
 
   const toggleDoc = (doc: PromptDocument) => {
@@ -80,59 +122,84 @@ export function ChatHeader({ className }: ChatHeaderProps) {
     },
   ];
 
+  const docCount = cfg.documents?.length ?? 0;
+  const conversations = chat.listConversationsMeta();
+
   return (
     <header
       className={cn(
-        "flex items-center justify-between gap-2 border-b bg-background/80 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "relative z-20 flex items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-3 py-2.5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55 sm:px-4",
         className,
       )}
     >
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="grid h-7 w-7 place-items-center rounded-md bg-primary/10 text-primary">
-          <Bot className="h-4 w-4" />
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="relative grid size-9 shrink-0 place-items-center rounded-xl grad-primary text-primary-foreground shadow-sm glow-primary">
+          {activeAgent?.icon ? (
+            <span className="text-lg leading-none">{activeAgent.icon}</span>
+          ) : (
+            <Sparkles className="size-[18px]" />
+          )}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">
-            {ui.title ?? "Chat"}
+          <p className="truncate text-sm font-semibold tracking-tight">
+            {ui.title ?? "Assistant"}
           </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {ui.subtitle ?? (
-              <>
-                {cfg.personality?.name ?? "Assistant"} · {cfg.model.label ?? cfg.model.id}
-              </>
-            )}
+          <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+            <span className="inline-block size-1.5 shrink-0 rounded-full bg-success shadow-[0_0_6px_currentColor]" />
+            <span className="truncate">
+              {ui.subtitle ?? (cfg.model.label || cfg.model.id || "Ready")}
+            </span>
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
-        {/* Personality menu */}
+      <div className="flex items-center gap-0.5">
+        {/* Agents menu */}
         {(ui.showModelSelector ?? true) && (
-          <DropdownMenu open={personalityOpen} onOpenChange={setPersonalityOpen}>
+          <DropdownMenu open={agentsOpen} onOpenChange={setAgentsOpen}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                <Brain className="h-3 w-3" />
-                {cfg.personality?.name ?? "Personality"}
-                <ChevronDown className="h-3 w-3 opacity-60" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden h-8 max-w-[180px] gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground sm:inline-flex"
+              >
+                <span className="text-sm leading-none">
+                  {activeAgent?.icon ?? "✨"}
+                </span>
+                <span className="truncate">
+                  {activeAgent?.name ?? cfg.personality?.name ?? "Agent"}
+                </span>
+                <ChevronDown className="size-3 shrink-0 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Personality preset</DropdownMenuLabel>
-              {Object.entries(defaultPersonalityPresets).map(([key, p]) => (
-                <DropdownMenuItem key={key} onClick={() => applyPersonality(p)}>
-                  <span>{p.name}</span>
-                  {cfg.personality?.name === p.name && (
-                    <Badge variant="secondary" className="ml-auto text-[9px]">on</Badge>
-                  )}
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Agents</DropdownMenuLabel>
+              <div className="max-h-64 overflow-y-auto">
+                {agents.map((a) => (
+                  <DropdownMenuItem
+                    key={a.id}
+                    onClick={() => applyAgent(a)}
+                    className="gap-2"
+                  >
+                    <span className="text-base leading-none">
+                      {a.icon ?? "🤖"}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{a.name}</span>
+                    {a.id === activeAgent?.id && (
+                      <Check className="size-3.5 shrink-0 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>System prompt</DropdownMenuLabel>
-              {Object.entries(defaultSystemPresets).map(([key, value]) => (
-                <DropdownMenuItem key={key} onClick={() => applySystem(key as keyof typeof defaultSystemPresets)}>
-                  <span className="capitalize">{key}</span>
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuItem onClick={() => openManager(true)}>
+                <Plus className="size-3.5" />
+                New agent
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openManager(false)}>
+                <Settings2 className="size-3.5" />
+                Manage agents…
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -141,90 +208,206 @@ export function ChatHeader({ className }: ChatHeaderProps) {
         {(ui.showDocumentPicker ?? true) && (
           <DropdownMenu open={docsOpen} onOpenChange={setDocsOpen}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                <FileText className="h-3 w-3" />
-                Docs
-                {(cfg.documents?.length ?? 0) > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-[9px]">
-                    {cfg.documents?.length}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <FileText className="size-3.5" />
+                <span className="hidden sm:inline">Docs</span>
+                {docCount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-0.5 h-4 min-w-4 justify-center rounded-full px-1 text-[9px] tabular-nums"
+                  >
+                    {docCount}
                   </Badge>
                 )}
-                <ChevronDown className="h-3 w-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel>Context documents</DropdownMenuLabel>
               {builtInDocs.map((d) => {
-                const active = (cfg.documents ?? []).some((x: PromptDocument) => x.id === d.id);
+                const active = (cfg.documents ?? []).some(
+                  (x: PromptDocument) => x.id === d.id,
+                );
                 return (
                   <DropdownMenuItem key={d.id} onClick={() => toggleDoc(d)}>
                     <span className="truncate">{d.name}</span>
-                    {active && <Badge variant="secondary" className="ml-auto text-[9px]">on</Badge>}
+                    {active && (
+                      <Badge variant="secondary" className="ml-auto text-[9px]">
+                        on
+                      </Badge>
+                    )}
                   </DropdownMenuItem>
                 );
               })}
               <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>Custom docs via config.documents</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                Toggle a doc to prepend it to the model&apos;s context.
+              </p>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
+        <span className="mx-1 hidden h-5 w-px bg-border/70 sm:block" />
+
+        {/* New chat — direct action */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="rounded-lg text-muted-foreground hover:text-foreground"
+              aria-label="New chat"
+              onClick={() => chat.newConversation()}
+            >
+              <MessageSquarePlus className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>New chat</TooltipContent>
+        </Tooltip>
+
         {/* Conversation history */}
         {(ui.enableConversationHistory ?? true) && (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Conversations">
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72">
-              <DropdownMenuLabel>Conversations</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => chat.newConversation()}>
-                <Plus className="h-3 w-3" />
-                New conversation
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {chat.listConversations().length === 0 ? (
-                <DropdownMenuItem disabled>No conversations yet</DropdownMenuItem>
-              ) : (
-                chat.listConversations().map((id) => (
-                  <DropdownMenuItem
-                    key={id}
-                    onClick={() => chat.setConversationId(id)}
-                    className="flex items-center justify-between"
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="rounded-lg text-muted-foreground hover:text-foreground"
+                    aria-label="Conversation history"
                   >
-                    <span className="truncate font-mono text-xs">{id}</span>
-                    {id === chat.conversationId && (
-                      <Badge variant="secondary" className="ml-2 text-[9px]">
-                        current
-                      </Badge>
-                    )}
-                  </DropdownMenuItem>
-                ))
+                    <History className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>History</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuLabel>Conversation history</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {conversations.length === 0 ? (
+                <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+                  No conversations yet.
+                  <br />
+                  Send a message to start one.
+                </p>
+              ) : (
+                <div className="max-h-72 overflow-y-auto">
+                  {conversations.map((c) => {
+                    const active = c.id === chat.conversationId;
+                    return (
+                      <div
+                        key={c.id}
+                        className={cn(
+                          "group/conv flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                          active ? "bg-accent" : "hover:bg-accent/60",
+                        )}
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => chat.setConversationId(c.id)}
+                          className="h-auto min-w-0 flex-1 justify-start gap-2 p-0 text-left font-normal hover:bg-transparent"
+                        >
+                          {active ? (
+                            <Check className="size-3.5 shrink-0 text-primary" />
+                          ) : (
+                            <span className="size-3.5 shrink-0" />
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-medium">
+                              {c.title}
+                            </span>
+                            <span className="block truncate text-[11px] text-muted-foreground">
+                              {c.messageCount} msg
+                              {c.updatedAt ? ` · ${relativeTime(c.updatedAt)}` : ""}
+                            </span>
+                          </span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Delete conversation"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            chat.deleteConversation(c.id);
+                          }}
+                          className="size-7 shrink-0 text-muted-foreground opacity-0 transition-opacity hover:bg-foreground/10 hover:text-destructive group-hover/conv:opacity-100"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
+        <ThemeToggle className="rounded-lg text-muted-foreground hover:text-foreground" />
+
         {/* Overflow */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="more">
-              <MoreHorizontal className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="rounded-lg text-muted-foreground hover:text-foreground"
+              aria-label="More"
+            >
+              <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => chat.clear()}>
-              <Trash2 className="h-3 w-3" />
-              Clear current conversation
+            <DropdownMenuItem onClick={() => openManager(false)}>
+              <Settings2 className="size-3.5" />
+              Manage agents…
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => chat.newConversation()}>
-              <Plus className="h-3 w-3" />
-              Start a new one
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => chat.clear()}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="size-3.5" />
+              Clear this conversation
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <AgentManager
+        open={managerOpen}
+        onOpenChange={setManagerOpen}
+        activeAgentId={activeAgent?.id ?? null}
+        onApply={applyAgent}
+        startInCreate={managerCreate}
+      />
     </header>
   );
+}
+
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const min = Math.round(diff / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  try {
+    return new Date(ts).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
 }

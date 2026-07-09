@@ -139,6 +139,10 @@ export interface UiConfig {
   subtitle?: string;
   placeholder?: string;
   emptyState?: ReactNodeLike;
+  /** Headline shown on the welcome screen (defaults to a greeting). */
+  greeting?: string;
+  /** Quick-start prompt chips shown on the empty welcome screen. */
+  suggestions?: string[];
   showModelSelector?: boolean;
   showDocumentPicker?: boolean;
   showToolCalls?: boolean;
@@ -193,6 +197,54 @@ export interface AttachmentMeta {
   text?: string;
 }
 
+/**
+ * A saved, switchable assistant configuration. Applying an agent updates the
+ * chat's system prompt, personality, and starter suggestions in one shot.
+ * Built-in agents ship with the package and are read-only; user agents are
+ * persisted to localStorage and fully editable.
+ */
+export interface Agent {
+  id: string;
+  name: string;
+  description?: string;
+  /** Emoji shown as the agent's mark (e.g. "🤖"). */
+  icon?: string;
+  systemPrompt: string;
+  tone?: PersonalityConfig["tone"];
+  locale?: string;
+  /** Quick-start prompt chips shown on the welcome screen for this agent. */
+  suggestions?: string[];
+  /** Built-ins cannot be edited or deleted (only duplicated). */
+  builtIn?: boolean;
+}
+
+/**
+ * A saved LLM provider profile: connection details (kind, base URL, key) plus
+ * the list of models it exposes. Used by the provider manager to CRUD and
+ * switch providers/models at runtime. Persisted to localStorage.
+ */
+export interface ProviderProfile {
+  id: string;
+  name: string;
+  /** Emoji mark shown in the picker. */
+  icon?: string;
+  kind: ProviderKind;
+  baseUrl: string;
+  apiKey: string;
+  /** Defaults to "x-api-key" for anthropic, "bearer" otherwise. */
+  authHeader?: ProviderConfig["authHeader"];
+  /** Models this provider exposes in the switcher. */
+  models: ModelDescriptor[];
+}
+
+/** Lightweight conversation descriptor for history menus. */
+export interface ConversationMeta {
+  id: string;
+  title: string;
+  updatedAt: number;
+  messageCount: number;
+}
+
 export interface ToolCallRecord {
   id: string;
   name: string;
@@ -212,6 +264,12 @@ export interface ChatMessage {
   toolCalls?: ToolCallRecord[];
   createdAt: number;
   status: MessageStatus;
+  /** Chain-of-thought / reasoning emitted before the final answer (assistant). */
+  reasoning?: string;
+  /** When the first token arrived (ms epoch) — used for tok/sec. */
+  startedAt?: number;
+  /** When generation finished (ms epoch). */
+  completedAt?: number;
   /** Token usage reported by the API for this message (assistant only). */
   usage?: {
     promptTokens?: number;
