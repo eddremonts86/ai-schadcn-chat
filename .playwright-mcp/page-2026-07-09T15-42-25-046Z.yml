@@ -1,0 +1,62 @@
+- main [ref=f2e4]:
+  - generic [ref=f2e6]:
+    - generic [ref=f2e7]:
+      - generic [ref=f2e8]:
+        - generic [ref=f2e10]: 💻
+        - generic [ref=f2e11]:
+          - paragraph [ref=f2e12]: Coding buddy
+          - paragraph [ref=f2e13]:
+            - generic [ref=f2e15]: MiniMax M3
+      - generic [ref=f2e16]:
+        - button "💻 Coding buddy" [ref=f2e17] [cursor=pointer]:
+          - generic [ref=f2e18]: 💻
+          - generic [ref=f2e19]: Coding buddy
+          - img
+        - button "Docs 1" [ref=f2e20] [cursor=pointer]:
+          - img
+          - generic [ref=f2e21]: Docs
+          - generic [ref=f2e22]: "1"
+        - button "New chat" [ref=f2e24] [cursor=pointer]:
+          - img
+        - button "Conversation history" [ref=f2e25] [cursor=pointer]:
+          - img
+        - button "Switch to dark mode" [ref=f2e26] [cursor=pointer]:
+          - img
+          - img
+        - button "More" [ref=f2e27] [cursor=pointer]:
+          - img
+    - generic [ref=f2e28]:
+      - generic [ref=f2e30]:
+        - img [ref=f2e32]
+        - heading "Hey Edd — what are we building?" [level=2] [ref=f2e35]
+        - paragraph [ref=f2e36]: Ask anything, or start with one of these. Powered by MiniMax M3.
+        - generic [ref=f2e37]:
+          - button "Explain async/await like I'm five" [ref=f2e38] [cursor=pointer]:
+            - generic [ref=f2e39]:
+              - img
+            - generic [ref=f2e40]: Explain async/await like I'm five
+          - button "Review this React component for bugs" [ref=f2e41] [cursor=pointer]:
+            - generic [ref=f2e42]:
+              - img
+            - generic [ref=f2e43]: Review this React component for bugs
+          - button "Write a SQL query with a CTE" [ref=f2e44] [cursor=pointer]:
+            - generic [ref=f2e45]:
+              - img
+            - generic [ref=f2e46]: Write a SQL query with a CTE
+          - button "Refactor this function to be pure" [ref=f2e47] [cursor=pointer]:
+            - generic [ref=f2e48]:
+              - img
+            - generic [ref=f2e49]: Refactor this function to be pure
+      - button:
+        - img
+    - generic [ref=f2e50]:
+      - generic [ref=f2e52]:
+        - button "Attach files" [ref=f2e53] [cursor=pointer]:
+          - img
+        - textbox "Ask anything, or paste some code…" [ref=f2e54]
+        - button "Select model" [ref=f2e55] [cursor=pointer]:
+          - generic [ref=f2e56]: MiniMax-M3
+          - img
+        - button "Send message" [disabled]:
+          - img
+      - paragraph [ref=f2e57]: Press Enter to send · Shift+Enter for a new line

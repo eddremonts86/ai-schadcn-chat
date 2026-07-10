@@ -1,0 +1,86 @@
+- generic:
+  - generic:
+    - generic:
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: 💻
+                - generic:
+                  - paragraph: Coding buddy
+                  - paragraph:
+                    - generic: MiniMax M3
+              - generic:
+                - button:
+                  - generic: 💻
+                  - generic: Coding buddy
+                  - img
+                - button [expanded]:
+                  - img
+                  - generic: Docs
+                  - generic: "1"
+                - button:
+                  - img
+                - button:
+                  - img
+                - button:
+                  - img
+                - button:
+                  - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - heading [level=2]: Hey Edd — what are we building?
+                  - paragraph: Ask anything, or start with one of these. Powered by MiniMax M3.
+                  - generic:
+                    - button:
+                      - generic:
+                        - img
+                      - generic: Explain async/await like I'm five
+                    - button:
+                      - generic:
+                        - img
+                      - generic: Review this React component for bugs
+                    - button:
+                      - generic:
+                        - img
+                      - generic: Write a SQL query with a CTE
+                    - button:
+                      - generic:
+                        - img
+                      - generic: Refactor this function to be pure
+              - button:
+                - img
+            - generic:
+              - generic:
+                - generic:
+                  - button:
+                    - img
+                  - textbox:
+                    - /placeholder: Ask anything, or paste some code…
+                  - button:
+                    - generic: MiniMax-M3
+                    - img
+                  - button [disabled]:
+                    - img
+              - paragraph: Press Enter to send · Shift+Enter for a new line
+  - menu "Docs 1" [active] [ref=f5e58]:
+    - generic [ref=f5e59]: Context documents
+    - menuitem "Web search guidance Cites sources and flags primary vs. aggregated info." [ref=f5e60]:
+      - generic [ref=f5e61]:
+        - generic [ref=f5e62]: Web search guidance
+        - paragraph [ref=f5e63]: Cites sources and flags primary vs. aggregated info.
+    - menuitem "Code reviewer Checks bugs, security, perf, readability & test coverage." [ref=f5e64]:
+      - generic [ref=f5e65]:
+        - generic [ref=f5e66]: Code reviewer
+        - paragraph [ref=f5e67]: Checks bugs, security, perf, readability & test coverage.
+    - menuitem "SQL guardrails Blocks unsafe SQL; requires WHERE clauses & parameters." [ref=f5e68]:
+      - generic [ref=f5e69]:
+        - generic [ref=f5e70]: SQL guardrails
+        - paragraph [ref=f5e71]: Blocks unsafe SQL; requires WHERE clauses & parameters.
+    - separator [ref=f5e72]
+    - paragraph [ref=f5e73]: Toggle a doc to prepend it to the model's context.
