@@ -105,18 +105,21 @@ export function ChatHeader({ className }: ChatHeaderProps) {
     {
       id: "built-in:web",
       name: "Web search guidance",
+      description: "Cites sources and flags primary vs. aggregated info.",
       alwaysOn: false,
       body: "When unsure, prefer citing authoritative web sources and link to them. Distinguish between primary sources and aggregators.",
     },
     {
       id: "built-in:code",
       name: "Code reviewer",
+      description: "Checks bugs, security, perf, readability & test coverage.",
       alwaysOn: false,
       body: "When reviewing code, point out: 1) correctness bugs, 2) security implications, 3) performance, 4) readability, 5) test coverage. Suggest minimal patches.",
     },
     {
       id: "built-in:sql",
       name: "SQL guardrails",
+      description: "Blocks unsafe SQL; requires WHERE clauses & parameters.",
       alwaysOn: false,
       body: "Never write destructive SQL without a WHERE clause. Prefer parameterized queries. Always state the table schema when joining.",
     },
@@ -207,24 +210,32 @@ export function ChatHeader({ className }: ChatHeaderProps) {
         {/* Documents menu */}
         {(ui.showDocumentPicker ?? true) && (
           <DropdownMenu open={docsOpen} onOpenChange={setDocsOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                <FileText className="size-3.5" />
-                <span className="hidden sm:inline">Docs</span>
-                {docCount > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-0.5 h-4 min-w-4 justify-center rounded-full px-1 text-[9px] tabular-nums"
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground"
                   >
-                    {docCount}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
+                    <FileText className="size-3.5" />
+                    <span className="hidden sm:inline">Docs</span>
+                    {docCount > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-0.5 h-4 min-w-4 justify-center rounded-full px-1 text-[9px] tabular-nums"
+                      >
+                        {docCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                Context documents — extra instructions prepended to the
+                model&apos;s system prompt
+              </TooltipContent>
+            </Tooltip>
             <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel>Context documents</DropdownMenuLabel>
               {builtInDocs.map((d) => {
@@ -232,17 +243,32 @@ export function ChatHeader({ className }: ChatHeaderProps) {
                   (x: PromptDocument) => x.id === d.id,
                 );
                 return (
-                  <DropdownMenuItem key={d.id} onClick={() => toggleDoc(d)}>
-                    <span className="truncate">{d.name}</span>
-                    {active && (
-                      <Badge variant="secondary" className="ml-auto text-[9px]">
-                        on
-                      </Badge>
-                    )}
+                  <DropdownMenuItem
+                    key={d.id}
+                    onClick={() => toggleDoc(d)}
+                    className="items-start gap-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2 truncate">
+                        {d.name}
+                        {active && (
+                          <Badge
+                            variant="secondary"
+                            className="ml-auto text-[9px]"
+                          >
+                            on
+                          </Badge>
+                        )}
+                      </span>
+                      {d.description && (
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {d.description}
+                        </p>
+                      )}
+                    </div>
                   </DropdownMenuItem>
                 );
               })}
-              <DropdownMenuSeparator />
               <DropdownMenuSeparator />
               <p className="px-2 py-1.5 text-xs text-muted-foreground">
                 Toggle a doc to prepend it to the model&apos;s context.
