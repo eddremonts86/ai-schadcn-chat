@@ -22,6 +22,11 @@ export interface ChatPanelProps {
   renderFooter?: () => ReactNode;
   /** Extra className on the outer container. */
   className?: string;
+  /** Extra className on the inner content wrapper of both the message list
+   *  and composer (merged over the default `max-w-3xl` via tailwind-merge).
+   *  Use this to let the conversation use more horizontal space in wide
+   *  layouts, e.g. `contentClassName="max-w-5xl"`. */
+  contentClassName?: string;
   /** Extra style. */
   style?: CSSProperties;
   /** Hide the header entirely. */
@@ -42,6 +47,7 @@ export function ChatPanel(props: ChatPanelProps) {
     renderHeader,
     renderFooter,
     className,
+    contentClassName,
     style,
     hideHeader = false,
     hideComposer = false,
@@ -63,9 +69,9 @@ export function ChatPanel(props: ChatPanelProps) {
           ) : hideHeader ? null : (
             <ChatHeader />
           )}
-          <MessageList />
+          <MessageList contentClassName={contentClassName} />
           {renderFooter ? renderFooter() : null}
-          {hideComposer ? null : <ChatComposer />}
+          {hideComposer ? null : <ChatComposer contentClassName={contentClassName} />}
         </div>
       </TooltipProvider>
     </ChatProvider>

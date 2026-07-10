@@ -1,0 +1,148 @@
+- generic [ref=f7e3]:
+  - banner [ref=f7e4]:
+    - generic [ref=f7e5]:
+      - link "ai-schadcn-chat" [ref=f7e6] [cursor=pointer]:
+        - /url: "#top"
+        - img [ref=f7e8]
+        - text: ai-schadcn-chat
+      - navigation [ref=f7e10]:
+        - button "Features" [ref=f7e11] [cursor=pointer]
+        - button "Live demo" [ref=f7e12] [cursor=pointer]
+      - generic [ref=f7e13]:
+        - link "View on npm" [ref=f7e14] [cursor=pointer]:
+          - /url: https://www.npmjs.com/package/ai-schadcn-chat
+          - img
+        - link "View on GitHub" [ref=f7e15] [cursor=pointer]:
+          - /url: https://github.com/eddremonts86/ai-schadcn-chat
+          - img
+        - button "Try it live" [ref=f7e16] [cursor=pointer]
+  - main [ref=f7e17]:
+    - generic [ref=f7e19]:
+      - generic [ref=f7e20]: React 18 · React 19 · shadcn/ui · MIT
+      - heading "The AI chat panel shadcn/ui forgot to ship." [level=1] [ref=f7e21]
+      - paragraph [ref=f7e22]: A fully-featured, deeply configurable chat UI for React — works with Anthropic, OpenAI, or any OpenAI-compatible gateway (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama…).
+      - generic [ref=f7e23]:
+        - generic [ref=f7e24]: Anthropic
+        - generic [ref=f7e25]: OpenAI
+        - generic [ref=f7e26]: OpenRouter
+        - generic [ref=f7e27]: MiniMax
+        - generic [ref=f7e28]: Ollama
+      - generic [ref=f7e29]:
+        - button "pnpm add ai-schadcn-chat" [ref=f7e30] [cursor=pointer]:
+          - generic [ref=f7e31]: pnpm add ai-schadcn-chat
+          - img [ref=f7e32]
+        - generic [ref=f7e35]:
+          - button "Try it live" [ref=f7e36] [cursor=pointer]
+          - link "View on GitHub" [ref=f7e37] [cursor=pointer]:
+            - /url: https://github.com/eddremonts86/ai-schadcn-chat
+    - generic [ref=f7e39]:
+      - generic [ref=f7e40]:
+        - heading "Everything a chat UI needs. Nothing it doesn't." [level=2] [ref=f7e41]
+        - paragraph [ref=f7e42]: Six things ai-schadcn-chat gets right out of the box.
+      - generic [ref=f7e43]:
+        - article [ref=f7e44]:
+          - img [ref=f7e46]
+          - heading "Three surfaces, one package" [level=3] [ref=f7e50]
+          - paragraph [ref=f7e51]: Drop in <ChatPanel /> for an instant UI, compose <ChatProvider /> + <MessageList /> + <ChatComposer /> for a custom layout, or use the framework-agnostic ChatEngine class without React at all.
+        - article [ref=f7e52]:
+          - img [ref=f7e54]
+          - heading "Any provider" [level=3] [ref=f7e56]
+          - paragraph [ref=f7e57]: Native adapters for Anthropic and OpenAI, plus a generic OpenAI-compatible mode for OpenRouter, MiniMax, Together, Groq, vLLM, Ollama…
+        - article [ref=f7e58]:
+          - img [ref=f7e60]
+          - heading "Built on shadcn/ui + Radix" [level=3] [ref=f7e66]
+          - paragraph [ref=f7e67]: Looks and feels like the rest of the shadcn ecosystem. Your Tailwind theme carries over automatically.
+        - article [ref=f7e68]:
+          - img [ref=f7e70]
+          - heading "Tools / function calling" [level=3] [ref=f7e72]
+          - paragraph [ref=f7e73]: Register named tools with JSON-Schema parameters and async handlers — the engine dispatches calls and feeds results back to the model.
+        - article [ref=f7e74]:
+          - img [ref=f7e76]
+          - heading "Streaming, persistence, retries" [level=3] [ref=f7e78]
+          - paragraph [ref=f7e79]: Incremental SSE streaming, automatic retry with exponential back-off for 429/5xx, opt-in localStorage persistence keyed by persistKey.
+        - article [ref=f7e80]:
+          - img [ref=f7e82]
+          - heading "Markdown, MDX, code highlighting" [level=3] [ref=f7e86]
+          - paragraph [ref=f7e87]: GFM tables, raw HTML, and syntax-highlighted code with one-click copy — all through react-markdown + remark-gfm + rehype-highlight + rehype-raw.
+    - generic [ref=f7e89]:
+      - generic [ref=f7e90]:
+        - heading "Try it live" [level=2] [ref=f7e91]
+        - paragraph [ref=f7e92]:
+          - text: This is the real
+          - code [ref=f7e93]: <ChatPanel />
+          - text: component, wired to MiniMax through the OpenAI-compatible protocol — not a screenshot.
+      - generic [ref=f7e95]:
+        - generic [ref=f7e96]:
+          - generic [ref=f7e97]:
+            - generic [ref=f7e99]: 💻
+            - generic [ref=f7e100]:
+              - paragraph [ref=f7e101]: Coding buddy
+              - paragraph [ref=f7e102]:
+                - generic [ref=f7e104]: MiniMax M3
+          - generic [ref=f7e105]:
+            - button "💻 Coding buddy" [ref=f7e106] [cursor=pointer]:
+              - generic [ref=f7e107]: 💻
+              - generic [ref=f7e108]: Coding buddy
+              - img
+            - button "Docs 1" [ref=f7e109] [cursor=pointer]:
+              - img
+              - generic [ref=f7e110]: Docs
+              - generic [ref=f7e111]: "1"
+            - button "New chat" [ref=f7e113] [cursor=pointer]:
+              - img
+            - button "Conversation history" [ref=f7e114] [cursor=pointer]:
+              - img
+            - button "Switch to dark mode" [ref=f7e115] [cursor=pointer]:
+              - img
+              - img
+            - button "More" [ref=f7e116] [cursor=pointer]:
+              - img
+        - generic [ref=f7e117]:
+          - generic [ref=f7e119]:
+            - img [ref=f7e121]
+            - heading "Hey — what are we building?" [level=2] [ref=f7e124]
+            - paragraph [ref=f7e125]: Ask anything, or start with one of these. Powered by MiniMax M3.
+            - generic [ref=f7e126]:
+              - button "Explain async/await like I'm five" [ref=f7e127] [cursor=pointer]:
+                - generic [ref=f7e128]:
+                  - img
+                - generic [ref=f7e129]: Explain async/await like I'm five
+              - button "Review this React component for bugs" [ref=f7e130] [cursor=pointer]:
+                - generic [ref=f7e131]:
+                  - img
+                - generic [ref=f7e132]: Review this React component for bugs
+              - button "Write a SQL query with a CTE" [ref=f7e133] [cursor=pointer]:
+                - generic [ref=f7e134]:
+                  - img
+                - generic [ref=f7e135]: Write a SQL query with a CTE
+              - button "Refactor this function to be pure" [ref=f7e136] [cursor=pointer]:
+                - generic [ref=f7e137]:
+                  - img
+                - generic [ref=f7e138]: Refactor this function to be pure
+          - button:
+            - img
+        - generic [ref=f7e139]:
+          - generic [ref=f7e141]:
+            - button "Attach files" [ref=f7e142] [cursor=pointer]:
+              - img
+            - textbox "Ask anything, or paste some code…" [ref=f7e143]
+            - button "Select model" [ref=f7e144] [cursor=pointer]:
+              - generic [ref=f7e145]: MiniMax-M3
+              - img
+            - button "Send message" [disabled]:
+              - img
+          - paragraph [ref=f7e146]: Press Enter to send · Shift+Enter for a new line
+  - contentinfo [ref=f7e147]:
+    - generic [ref=f7e148]:
+      - paragraph [ref=f7e149]: MIT License · ai-schadcn-chat
+      - generic [ref=f7e150]:
+        - link "npm" [ref=f7e151] [cursor=pointer]:
+          - /url: https://www.npmjs.com/package/ai-schadcn-chat
+          - img [ref=f7e152]
+          - text: npm
+        - link "GitHub" [ref=f7e156] [cursor=pointer]:
+          - /url: https://github.com/eddremonts86/ai-schadcn-chat
+          - img [ref=f7e157]
+          - text: GitHub
+  - button "Ask about this library" [ref=f7e160] [cursor=pointer]:
+    - img

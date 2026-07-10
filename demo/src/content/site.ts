@@ -19,19 +19,39 @@ export const NAV_LINKS: NavLink[] = [
 ];
 
 export const HERO_CONTENT = {
-  eyebrow: "React 18 · React 19 · shadcn/ui · MIT",
   headline: "The AI chat panel shadcn/ui forgot to ship.",
   subheadline:
     "A fully-featured, deeply configurable chat UI for React — works with Anthropic, OpenAI, or any OpenAI-compatible gateway (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama…).",
-  providers: ["Anthropic", "OpenAI", "OpenRouter", "MiniMax", "Ollama"],
+  providersLine: "Anthropic · OpenAI · OpenRouter · MiniMax · Together · Groq · vLLM · Ollama",
 };
+
+/** Rendered through the package's own <Markdown /> component in the hero —
+ * same syntax-highlighting pipeline the chat messages use, so the marketing
+ * page and the product share one code-rendering path. */
+export const QUICK_START_SNIPPET = `\`\`\`tsx
+import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
+import "ai-schadcn-chat/styles.css";
+
+export function App() {
+  const config = defaultConfig({
+    systemPrompt: "You are a concise coding assistant.",
+    ui: { title: "Coding buddy" },
+  });
+
+  return <ChatPanel config={config} />;
+}
+\`\`\``;
 
 export interface FeatureItem {
   icon: "layers" | "plug" | "palette" | "wrench" | "zap" | "code";
   title: string;
   description: string;
-  wide?: boolean;
+  featured?: boolean;
 }
+
+/** The three concrete import paths behind the "Three surfaces" feature —
+ * rendered as code chips inside its featured panel. */
+export const THREE_SURFACES = ["<ChatPanel />", "<ChatProvider /> + <MessageList /> + <ChatComposer />", "ChatEngine"];
 
 export const FEATURES: FeatureItem[] = [
   {
@@ -39,7 +59,7 @@ export const FEATURES: FeatureItem[] = [
     title: "Three surfaces, one package",
     description:
       "Drop in <ChatPanel /> for an instant UI, compose <ChatProvider /> + <MessageList /> + <ChatComposer /> for a custom layout, or use the framework-agnostic ChatEngine class without React at all.",
-    wide: true,
+    featured: true,
   },
   {
     icon: "plug",
@@ -70,7 +90,6 @@ export const FEATURES: FeatureItem[] = [
     title: "Markdown, MDX, code highlighting",
     description:
       "GFM tables, raw HTML, and syntax-highlighted code with one-click copy — all through react-markdown + remark-gfm + rehype-highlight + rehype-raw.",
-    wide: true,
   },
 ];
 
