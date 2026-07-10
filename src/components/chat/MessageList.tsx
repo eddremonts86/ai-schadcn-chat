@@ -62,6 +62,10 @@ import type { ChatError, ChatMessage, Role } from "../../types/chat.js";
 
 export interface MessageListProps {
   className?: string;
+  /** Extra className on the inner content wrapper, merged over the default
+   *  `max-w-3xl` via tailwind-merge. Use this to let the conversation use
+   *  more horizontal space in wide layouts. */
+  contentClassName?: string;
 }
 
 const DEFAULT_SUGGESTIONS = [
@@ -71,7 +75,7 @@ const DEFAULT_SUGGESTIONS = [
   "Summarize a long document",
 ];
 
-export function MessageList({ className }: MessageListProps) {
+export function MessageList({ className, contentClassName }: MessageListProps) {
   const chat = useChat();
   const messages = chat.messages;
 
@@ -84,7 +88,7 @@ export function MessageList({ className }: MessageListProps) {
           </MessageScrollerViewport>
         ) : (
           <MessageScrollerViewport>
-            <MessageScrollerContent className="mx-auto w-full max-w-3xl gap-5 px-3 py-6 sm:px-5">
+            <MessageScrollerContent className={cn("mx-auto w-full max-w-3xl gap-5 px-3 py-6 sm:px-5", contentClassName)}>
               {messages.map((msg, idx) => (
                 <MessageScrollerItem
                   key={msg.id}

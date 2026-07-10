@@ -1,5 +1,11 @@
-import { GithubIcon, Package, Sparkles } from "lucide-react";
-import { Button } from "ai-schadcn-chat/components";
+import { GithubIcon, Menu, Package, Sparkles } from "lucide-react";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "ai-schadcn-chat/components";
 import { NAV_LINKS, NPM_URL, REPO_URL } from "../content/site";
 import { useScrollToId } from "../hooks/useScrollToId";
 
@@ -34,7 +40,7 @@ export function SiteNav() {
             variant="ghost"
             size="icon-sm"
             asChild
-            className="text-muted-foreground hover:text-foreground"
+            className="hidden text-muted-foreground hover:text-foreground sm:inline-flex"
           >
             <a href={NPM_URL} target="_blank" rel="noreferrer" aria-label="View on npm">
               <Package className="size-4" />
@@ -44,7 +50,7 @@ export function SiteNav() {
             variant="ghost"
             size="icon-sm"
             asChild
-            className="text-muted-foreground hover:text-foreground"
+            className="hidden text-muted-foreground hover:text-foreground sm:inline-flex"
           >
             <a href={REPO_URL} target="_blank" rel="noreferrer" aria-label="View on GitHub">
               <GithubIcon className="size-4" />
@@ -53,8 +59,40 @@ export function SiteNav() {
           <Button size="sm" onClick={() => scrollToId("live-demo")} className="gap-1.5">
             Try it live
           </Button>
+
+          {/* Mobile: nav links + npm/GitHub collapse into one menu. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Open menu"
+                className="text-muted-foreground hover:text-foreground sm:hidden"
+              >
+                <Menu className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {NAV_LINKS.map((link) => (
+                <DropdownMenuItem key={link.targetId} onClick={() => scrollToId(link.targetId)}>
+                  {link.label}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuItem asChild>
+                <a href={NPM_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2">
+                  <Package className="size-3.5" /> npm
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={REPO_URL} target="_blank" rel="noreferrer" className="flex items-center gap-2">
+                  <GithubIcon className="size-3.5" /> GitHub
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
   );
 }
+

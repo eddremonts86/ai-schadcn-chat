@@ -4,7 +4,7 @@ import type { ChatConfig } from "ai-schadcn-chat";
 export function LiveDemoSection({ config }: { config: ChatConfig }) {
   return (
     <section id="live-demo" className="px-4 py-16 sm:px-6 sm:py-24">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Try it live
@@ -18,8 +18,13 @@ export function LiveDemoSection({ config }: { config: ChatConfig }) {
           </p>
         </div>
 
-        <div className="h-[min(680px,80dvh)] w-full">
-          <ChatPanel config={config} layout="panel" className="shadow-2xl" />
+        <div className="h-[min(760px,80dvh)] w-full">
+          <ChatPanel
+            config={config}
+            layout="panel"
+            className="shadow-2xl"
+            contentClassName="max-w-5xl"
+          />
         </div>
       </div>
     </section>

@@ -19,7 +19,7 @@ export function SupportWidget({ config }: { config: ChatConfig }) {
       {widget.isOpen && (
         <div
           className={cn(
-            "fixed bottom-24 right-5 z-40 flex h-[min(600px,calc(100vh-8rem))] w-[min(400px,calc(100vw-2.5rem))]",
+            "fixed bottom-24 right-5 z-40 flex h-[min(640px,calc(100vh-8rem))] w-[min(460px,calc(100vw-2.5rem))]",
             "flex-col overflow-hidden rounded-2xl surface-elevated app-mesh shadow-2xl animate-message-in",
           )}
         >

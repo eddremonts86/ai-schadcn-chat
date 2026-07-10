@@ -89,10 +89,14 @@ export interface MessageInputProps {
   }) => ReactNode;
   /** Extra className on the form. */
   className?: string;
+  /** Extra className on the inner content wrapper (the composer card and hint
+   *  text), merged over the default `max-w-3xl` via tailwind-merge. Use this
+   *  to let the composer use more horizontal space in wide layouts. */
+  contentClassName?: string;
 }
 
 export function MessageInput(props: MessageInputProps) {
-  const { onSend, streaming, disabled, renderSendButton, className } = props;
+  const { onSend, streaming, disabled, renderSendButton, className, contentClassName } = props;
 
   const chat = useChat();
   const cfg = chat.config;
@@ -250,6 +254,7 @@ export function MessageInput(props: MessageInputProps) {
           "border-border/70 shadow-[0_2px_8px_-4px_oklch(var(--foreground)/0.1)]",
           "focus-within:border-primary/50 focus-within:shadow-[0_0_0_1px_oklch(var(--primary)/0.35),0_10px_30px_-12px_oklch(var(--glow)/0.5)]",
           dragOver && "border-primary/60 ring-2 ring-primary/30",
+          contentClassName,
         )}
       >
         {(attachments.length > 0 || uploadingCount > 0) && (
@@ -360,7 +365,7 @@ export function MessageInput(props: MessageInputProps) {
         </div>
       </div>
 
-      <p className="mx-auto mt-2 max-w-3xl px-1 text-center text-[11px] text-muted-foreground/70">
+      <p className={cn("mx-auto mt-2 max-w-3xl px-1 text-center text-[11px] text-muted-foreground/70", contentClassName)}>
         Press{" "}
         <kbd className="rounded border border-border/70 bg-muted/60 px-1 font-sans text-[10px]">
           Enter
