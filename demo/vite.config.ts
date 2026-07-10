@@ -19,13 +19,18 @@ export default defineConfig({
   root: demoRoot,
   plugins: [react()],
   resolve: {
+    // Order matters: Vite matches aliases by prefix ("foo" also matches
+    // "foo/bar"), walking this object in declaration order and stopping at
+    // the first hit. The bare "ai-schadcn-chat" entry must come LAST, or it
+    // swallows every "ai-schadcn-chat/<subpath>" import before the specific
+    // entries below ever get a chance to match.
     alias: {
-      "ai-schadcn-chat": resolve(pkgRoot, "src/index.ts"),
       "ai-schadcn-chat/hooks": resolve(pkgRoot, "src/hooks/index.ts"),
       "ai-schadcn-chat/providers": resolve(pkgRoot, "src/providers/index.ts"),
       "ai-schadcn-chat/lib": resolve(pkgRoot, "src/lib/index.ts"),
       "ai-schadcn-chat/types": resolve(pkgRoot, "src/types/index.ts"),
       "ai-schadcn-chat/components": resolve(pkgRoot, "src/components/index.ts"),
+      "ai-schadcn-chat": resolve(pkgRoot, "src/index.ts"),
       "@": resolve(pkgRoot, "src"),
     },
   },
