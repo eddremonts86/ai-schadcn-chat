@@ -1,0 +1,56 @@
+/*
+ * shadcn/typeset — official preset catalog
+ * https://ui.shadcn.com/docs/typeset#custom-typesets
+ *
+ * This file ships the presets shown in the shadcn/typeset documentation.
+ * They are intentionally written as small overrides on top of the base
+ * `.typeset` container — three values control the rhythm (size, leading,
+ * flow) and everything else derives.
+ *
+ * Import alongside the base typeset.css:
+ *
+ *   @import "tailwindcss";
+ *   @import "ai-schadcn-chat/typeset.css";
+ *   @import "ai-schadcn-chat/typeset-presets.css";
+ *
+ * Or use the package subpath: `ai-schadcn-chat/typeset-presets.css`.
+ *
+ * Author your own preset by adding a class with the three overrides:
+ *
+ *   .typeset-cozy {
+ *     --typeset-flow: 1.1em;
+ *     --typeset-leading: 1.7;
+ *   }
+ *
+ * If you only want the base `.typeset` styles, skip this file entirely.
+ */
+
+.typeset-chat {
+  --typeset-flow: 1em;
+  --typeset-leading: 1.6;
+}
+
+.typeset-docs {
+  --typeset-size: 15px;
+  --typeset-flow: 1.5em;
+}
+
+.typeset-reading {
+  --typeset-font-body: var(--font-lora, Georgia, serif);
+  --typeset-font-heading: var(--font-lora, Georgia, serif);
+  --typeset-size: 18px;
+  --typeset-leading: 1.9;
+  --typeset-flow: 2em;
+}
+
+.typeset-compact {
+  --typeset-size: 14px;
+  --typeset-leading: 1.6;
+  --typeset-flow: 1em;
+}
+
+.typeset-large {
+  --typeset-size: 16px;
+  --typeset-leading: 2;
+  --typeset-flow: 2em;
+}

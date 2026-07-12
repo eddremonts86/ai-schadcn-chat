@@ -134,11 +134,54 @@ export interface ChatConfig {
   onError?: (err: ChatError, ctx: { conversationId: string }) => void;
 }
 
+export interface TypesetConfig {
+  /**
+   * Master switch. Defaults to `true` when the block is present. Set to `false`
+   * to opt a single chat out of typeset styling and fall back to `ai-prose`.
+   */
+  enabled?: boolean;
+  /**
+   * Which preset class to apply alongside the base `.typeset`. The CSS that
+   * ships with the package defines `typeset-chat`, `typeset-docs`,
+   * `typeset-reading`, `typeset-compact`, `typeset-large`. `"default"` means
+   * "no preset, just the base container".
+   */
+  preset?: TypesetPreset;
+  /** Override `--typeset-size` (base text size). Any CSS length. */
+  size?: string;
+  /** Override `--typeset-leading` (line-height multiplier). Unitless number. */
+  leading?: number;
+  /** Override `--typeset-flow` (space between blocks). Any CSS length. */
+  flow?: string;
+  /** Override the body font family inside markdown. Any CSS font-family value. */
+  fontBody?: string;
+  /** Override the heading font family inside markdown. */
+  fontHeading?: string;
+  /** Override the monospace font family inside code blocks. */
+  fontMono?: string;
+}
+
+export type TypesetPreset =
+  | "default"
+  | "chat"
+  | "docs"
+  | "reading"
+  | "compact"
+  | "large";
+
 export interface UiConfig {
   title?: string;
   subtitle?: string;
   placeholder?: string;
   emptyState?: ReactNodeLike;
+  /**
+   * Markdown styling preset + overrides from [shadcn/typeset](https://ui.shadcn.com/docs/typeset).
+   * When set, the assistant's markdown renders through `.typeset` with the chosen preset
+   * and any rhythm overrides you supply. When undefined or `enabled === false`, the
+   * package falls back to its built-in `ai-prose` styling so existing consumers see
+   * no change.
+   */
+  typeset?: TypesetConfig;
   /** Headline shown on the welcome screen (defaults to a greeting). */
   greeting?: string;
   /** Quick-start prompt chips shown on the empty welcome screen. */

@@ -21,6 +21,7 @@ import {
 import {
   ChatProvider,
   ChatPanel,
+  TYPESET_PRESETS,
   useChat,
   type ChatConfig,
 } from "ai-schadcn-chat";
@@ -866,6 +867,119 @@ function FieldControl({
     field.path === "ui.renderFooter"
   ) {
     return <ReadOnlyNote label={label} text="Render slot. Pass a function via defaultConfig({ ui: { renderMessage: (msg) => … } }) in your app code." />;
+  }
+
+  // UI - Markdown typeset (shadcn/typeset)
+  if (field.path === "ui.typeset.enabled") {
+    const enabled = config.ui?.typeset?.enabled !== false;
+    const hasBlock = config.ui?.typeset !== undefined;
+    return (
+      <SwitchField
+        label={label}
+        checked={enabled}
+        onChange={(v) =>
+          updateConfig({
+            ui: {
+              ...config.ui,
+              typeset: {
+                ...config.ui?.typeset,
+                enabled: v,
+                // Seed defaults the first time the user enables the block so
+                // the form doesn't show empty values everywhere.
+                preset: config.ui?.typeset?.preset ?? "default",
+              },
+            },
+          })
+        }
+        helpText={hasBlock ? undefined : "Activates the markdown typeset preset and overrides."}
+      />
+    );
+  }
+  if (field.path === "ui.typeset.preset") {
+    const preset = config.ui?.typeset?.preset ?? "default";
+    return (
+      <SelectField
+        label={label}
+        value={preset}
+        options={TYPESET_PRESETS.map((p) => ({ value: p, label: p }))}
+        onChange={(v) =>
+          updateConfig({
+            ui: {
+              ...config.ui,
+              typeset: {
+                ...config.ui?.typeset,
+                preset: v as (typeof TYPESET_PRESETS)[number],
+                enabled: config.ui?.typeset?.enabled ?? true,
+              },
+            },
+          })
+        }
+        helpText="See https://ui.shadcn.com/docs/typeset for the full catalog."
+      />
+    );
+  }
+  if (field.path === "ui.typeset.size") {
+    return (
+      <TextField
+        label={label}
+        value={config.ui?.typeset?.size ?? ""}
+        onChange={(v) =>
+          updateConfig({
+            ui: {
+              ...config.ui,
+              typeset: {
+                ...config.ui?.typeset,
+                size: v || undefined,
+                enabled: config.ui?.typeset?.enabled ?? true,
+              },
+            },
+          })
+        }
+        helpText="Any CSS length. e.g. 15px, 1rem, 0.95em."
+      />
+    );
+  }
+  if (field.path === "ui.typeset.leading") {
+    return (
+      <NumberField
+        label={label}
+        value={config.ui?.typeset?.leading ?? 0}
+        onChange={(v) =>
+          updateConfig({
+            ui: {
+              ...config.ui,
+              typeset: {
+                ...config.ui?.typeset,
+                leading: v || undefined,
+                enabled: config.ui?.typeset?.enabled ?? true,
+              },
+            },
+          })
+        }
+        step={0.1}
+      />
+    );
+  }
+  if (field.path === "ui.typeset.flow") {
+    return (
+      <TextField
+        label={label}
+        value={config.ui?.typeset?.flow ?? ""}
+        onChange={(v) =>
+          updateConfig({
+            ui: {
+              ...config.ui,
+              typeset: {
+                ...config.ui?.typeset,
+                flow: v || undefined,
+                enabled: config.ui?.typeset?.enabled ?? true,
+              },
+            },
+          })
+        }
+        helpText="Any CSS length. e.g. 1.25em, 18px."
+      />
+    );
   }
 
   // Unknown field type — keep the form compiling even when the catalog

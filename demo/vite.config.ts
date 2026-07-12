@@ -25,6 +25,8 @@ export default defineConfig({
     // swallows every "ai-schadcn-chat/<subpath>" import before the specific
     // entries below ever get a chance to match.
     alias: {
+      "ai-schadcn-chat/typeset.css": resolve(pkgRoot, "src/styles/typeset.css"),
+      "ai-schadcn-chat/typeset-presets.css": resolve(pkgRoot, "src/styles/typeset-presets.css"),
       "ai-schadcn-chat/hooks": resolve(pkgRoot, "src/hooks/index.ts"),
       "ai-schadcn-chat/providers": resolve(pkgRoot, "src/providers/index.ts"),
       "ai-schadcn-chat/lib": resolve(pkgRoot, "src/lib/index.ts"),

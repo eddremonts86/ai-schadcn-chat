@@ -24,7 +24,7 @@
 //   them inside `dist/package.json` would be redundant at best and
 //   contradictory at worst.
 
-import { readFile, writeFile, access } from "node:fs/promises";
+import { readFile, writeFile, copyFile, access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,6 +33,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, "..");
 const distDir = resolve(rootDir, "dist");
 const distPkgPath = resolve(distDir, "package.json");
+const distStylesPath = resolve(distDir, "styles.css");
+const distTypesetPath = resolve(distDir, "typeset.css");
+const distTypesetPresetsPath = resolve(distDir, "typeset-presets.css");
+const srcStylesPath = resolve(rootDir, "src/styles/typeset.css");
+const srcTypesetPresetsPath = resolve(rootDir, "src/styles/typeset-presets.css");
 
 const DESIRED = {
   type: "module",
@@ -68,6 +73,27 @@ async function main() {
   merged.sideEffects = DESIRED.sideEffects;
 
   await writeFile(distPkgPath, JSON.stringify(merged, null, 2) + "\n", "utf8");
+
+  // Copy typeset.css + typeset-presets.css into dist/ so the package can ship
+  // them via the "./typeset.css" and "./typeset-presets.css" subpath exports.
+  // Vite bundles its own styles.css but these are separate vendor files we
+  // ship as-is. typeset-presets.css is opt-in (only import if you want the
+  // preset catalog baked in).
+  try {
+    await copyFile(srcStylesPath, distTypesetPath);
+    console.log(`postbuild: copied ${srcStylesPath} -> ${distTypesetPath}`);
+  } catch (err) {
+    console.error(`postbuild: failed to copy typeset.css: ${err.message}`);
+    process.exit(1);
+  }
+  try {
+    await copyFile(srcTypesetPresetsPath, distTypesetPresetsPath);
+    console.log(`postbuild: copied ${srcTypesetPresetsPath} -> ${distTypesetPresetsPath}`);
+  } catch (err) {
+    console.error(`postbuild: failed to copy typeset-presets.css: ${err.message}`);
+    process.exit(1);
+  }
+
   console.log("postbuild: done");
   console.log(`postbuild: wrote ${distPkgPath}`);
 }
