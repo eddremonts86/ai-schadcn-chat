@@ -16,6 +16,7 @@ export interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { label: "Features", targetId: "features" },
   { label: "Live demo", targetId: "live-demo" },
+  { label: "Config", targetId: "config-reference" },
 ];
 
 export const HERO_CONTENT = {

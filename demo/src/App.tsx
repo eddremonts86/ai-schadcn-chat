@@ -10,13 +10,11 @@ import { SiteFooter } from "./components/SiteFooter";
 import { SupportWidget } from "./components/SupportWidget";
 
 /**
- * Landing page for the ai-schadcn-chat npm package. Two personas run side
- * by side against the same MiniMax deployment (see lib/chat-configs.ts):
+ * Landing page for the ai-schadcn-chat npm package. Two personas run against
+ * the same MiniMax deployment (see lib/chat-configs.ts):
  *
- *  • "Coding buddy" — embedded live in the #live-demo section, the real
- *    <ChatPanel /> component rendered inline, not a screenshot.
- *  • "Docs guide" — behind the floating support bubble bottom-right,
- *    answering questions about the library itself.
+ *  • "Coding buddy" — the real <ChatPanel /> rendered inline in #live-demo.
+ *  • "Docs guide" — behind the floating support bubble bottom-right.
  *
  * All env wiring, provider-manager syncing, and config building live in
  * lib/ + hooks/ so this file stays a plain composition root.
