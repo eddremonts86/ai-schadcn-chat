@@ -764,3 +764,14 @@
     -webkit-text-fill-color: currentColor;
   }
 }
+/* ---------------------------------------------------------------------------
+ * shadcn/typeset — markdown styling system.
+ *
+ * The base (`typeset.css`) and the preset catalog (`typeset-presets.css`)
+ * are imported from `main.tsx` because Vite handles package-alias CSS
+ * imports better from TS than from inside another CSS file. The
+ * playground's "Markdown preset" form field lets each chat switch between
+ * the official shadcn presets (chat, docs, reading, compact, large) at
+ * runtime. If you don't ship `config.ui.typeset`, the package falls back
+ * to its built-in `ai-prose` look.
+ * ------------------------------------------------------------------------- */

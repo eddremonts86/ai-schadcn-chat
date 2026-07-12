@@ -992,6 +992,85 @@ ui: { height: "min(80dvh, 760px)" }`,
   ),
 }`,
     },
+
+    // UI - Markdown typeset (shadcn/typeset)
+    {
+      path: "ui.typeset.enabled",
+      name: "ui.typeset.enabled",
+      type: "boolean",
+      defaultValue: "true (when ui.typeset block is present)",
+      required: false,
+      description:
+        "Master switch for the typeset styling system. When false (or when the ui.typeset block is absent), markdown falls back to the package's built-in `ai-prose` styles. When true, assistant messages render through [shadcn/typeset](https://ui.shadcn.com/docs/typeset) using the preset and overrides from this block.",
+      example: `ui: {
+  typeset: {
+    enabled: true,       // default
+    preset: "reading",   // serif, larger type, roomier rhythm
+  },
+}`,
+    },
+    {
+      path: "ui.typeset.preset",
+      name: "ui.typeset.preset",
+      type: "enum",
+      enumValues: ["default", "chat", "docs", "reading", "compact", "large"],
+      defaultValue: '"default"',
+      required: false,
+      description:
+        "Which typeset preset class to apply alongside the base `.typeset`. `default` is just the base container (1em / 1.75 / 1.25em). `chat` is tighter (1em / 1.6 / 1em). `reading` is serif and large. See https://ui.shadcn.com/docs/typeset for the full catalog and how to author your own preset.",
+      example: `ui: {
+  typeset: {
+    preset: "chat",      // bubbles feel like Slack, not docs
+    // preset: "reading", // serif, larger type, roomier rhythm
+    // preset: "compact", // dense UI mode
+  },
+}`,
+    },
+    {
+      path: "ui.typeset.size",
+      name: "ui.typeset.size",
+      type: "string",
+      defaultValue: "preset default",
+      required: false,
+      description:
+        "Override `--typeset-size` for this chat. Any CSS length (e.g. `15px`, `1rem`, `0.95em`). Container-aware: `1em` follows the surrounding layout's font-size, so a chat bubble inside a small UI looks smaller than a chat inside a wide docs column.",
+      example: `ui: {
+  typeset: {
+    preset: "docs",
+    size: "16px",        // bump the docs preset a bit
+  },
+}`,
+    },
+    {
+      path: "ui.typeset.leading",
+      name: "ui.typeset.leading",
+      type: "number",
+      defaultValue: "preset default",
+      required: false,
+      description:
+        "Override `--typeset-leading` (line-height multiplier). Unitless. Higher = more breathing room between lines. The `reading` preset uses 1.9; the `chat` preset uses 1.6.",
+      example: `ui: {
+  typeset: {
+    preset: "chat",
+    leading: 1.8,        // looser chat bubbles for accessibility
+  },
+}`,
+    },
+    {
+      path: "ui.typeset.flow",
+      name: "ui.typeset.flow",
+      type: "string",
+      defaultValue: "preset default",
+      required: false,
+      description:
+        "Override `--typeset-flow` (space between blocks). Any CSS length. The `reading` preset uses 2em; `compact` uses 1em.",
+      example: `ui: {
+  typeset: {
+    preset: "compact",
+    flow: "1.25em",      // slightly looser than the preset default
+  },
+}`,
+    },
   ],
 };
 

@@ -1,21 +1,28 @@
 /**
  * Markdown — renders assistant/tool message content as rich GitHub-flavored
  * Markdown with syntax-highlighted code blocks (copy + language label),
- * tables, links, lists, and inline code.
+ * tables, links, and lists.
  *
  * Pipeline: react-markdown + remark-gfm (tables/strikethrough/autolinks) +
  * rehype-raw (inline HTML) + rehype-highlight (highlight.js token classes,
  * themed in globals.css). The renderer is memoized so re-renders during
  * streaming only re-parse when the text actually changes.
+ *
+ * Styling: when `typeset` is set, the container gets `typeset` + the chosen
+ * preset class + CSS variables for any rhythm overrides. When omitted or
+ * `enabled === false`, we fall back to `ai-prose` so existing consumers see
+ * no change. Either way, the per-element classes in `components` below still
+ * apply — Tailwind utilities win specificity over typeset's `:where()` rules.
  */
 import { Check, Copy } from "lucide-react";
-import { memo, useState, type ReactNode } from "react";
+import { memo, useState, type CSSProperties, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { Button } from "../ui/button.js";
 import { cn } from "../../lib/utils.js";
+import type { TypesetConfig } from "../../types/chat.js";
 
 function CopyButton({ getText }: { getText: () => string }) {
   const [copied, setCopied] = useState(false);
@@ -62,18 +69,56 @@ function nodeToText(node: ReactNode): string {
 export interface MarkdownProps {
   children: string;
   className?: string;
+  /**
+   * Optional typeset styling. When provided, the container becomes a
+   * `.typeset` element with the chosen preset + rhythm overrides. When
+   * undefined, the container falls back to the package's `ai-prose` class
+   * (the look every chat shipped with before this feature).
+   *
+   * The consumer app typically wires this from `config.ui.typeset` via the
+   * parent component. Passing it directly is supported for callers that
+   * want to bypass config plumbing (custom renderers, tests).
+   */
+  typeset?: TypesetConfig;
+}
+
+/**
+ * Resolves which CSS class + inline style the markdown container should use.
+ * Pure function, exported for unit tests.
+ */
+export function typesetClassName(typeset: TypesetConfig | undefined): string {
+  if (!typeset || typeset.enabled === false) {
+    // Legacy look. Keep the same class so existing snapshots stay stable.
+    return cn("ai-prose", "text-[0.9375rem] leading-relaxed");
+  }
+  const presetClass =
+    typeset.preset && typeset.preset !== "default" ? `typeset-${typeset.preset}` : "typeset";
+  return cn(presetClass, "text-[var(--typeset-size)]");
+}
+
+export function typesetInlineStyle(typeset: TypesetConfig | undefined): CSSProperties | undefined {
+  if (!typeset || typeset.enabled === false) return undefined;
+  const vars: Record<string, string | number> = {};
+  if (typeset.size) vars["--typeset-size"] = typeset.size;
+  if (typeof typeset.leading === "number") vars["--typeset-leading"] = typeset.leading;
+  if (typeset.flow) vars["--typeset-flow"] = typeset.flow;
+  if (typeset.fontBody) vars["--typeset-font-body"] = typeset.fontBody;
+  if (typeset.fontHeading) vars["--typeset-font-heading"] = typeset.fontHeading;
+  if (typeset.fontMono) vars["--typeset-font-mono"] = typeset.fontMono;
+  return Object.keys(vars).length > 0 ? (vars as CSSProperties) : undefined;
 }
 
 export const Markdown = memo(function Markdown({
   children,
   className,
+  typeset,
 }: MarkdownProps) {
+  const containerClass = typesetClassName(typeset);
+  const containerStyle = typesetInlineStyle(typeset);
   return (
     <div
-      className={cn(
-        "ai-prose text-[0.9375rem] leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
-        className,
-      )}
+      className={cn(containerClass, className)}
+      style={containerStyle}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}

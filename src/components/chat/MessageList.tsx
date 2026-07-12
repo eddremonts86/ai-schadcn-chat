@@ -54,6 +54,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible.js";
 import { Markdown } from "./Markdown.js";
+import { useOptionalChat } from "./ChatProvider.js";
 import { ReasoningPanel, splitReasoning } from "./ReasoningPanel.js";
 import { Textarea } from "../ui/input.js";
 import { extractMessageText } from "../../lib/attachments.js";
@@ -517,6 +518,12 @@ function MessageBody({
   isUser: boolean;
   text: string;
 }) {
+  // Pull the active config (if any) so markdown can pick up the per-chat
+  // typeset styling without changing this component's prop signature.
+  // useOptionalChat returns null when the MessageList renders outside a
+  // ChatProvider (e.g. in tests) — we fall back to the legacy look in that case.
+  const chatCtx = useOptionalChat();
+  const typeset = chatCtx?.config.ui?.typeset;
   if (message.role === "tool") {
     return (
       <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs">
@@ -527,7 +534,7 @@ function MessageBody({
   if (isUser) {
     return <span className="whitespace-pre-wrap break-words">{text}</span>;
   }
-  return <Markdown>{text}</Markdown>;
+  return <Markdown typeset={typeset}>{text}</Markdown>;
 }
 
 function humanizeError(error?: ChatError): {

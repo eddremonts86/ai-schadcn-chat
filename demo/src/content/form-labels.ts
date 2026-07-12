@@ -95,7 +95,12 @@ export type FormLabelKey =
   | "ui.className"
   | "ui.renderMessage"
   | "ui.renderHeader"
-  | "ui.renderFooter";
+  | "ui.renderFooter"
+  | "ui.typeset.enabled"
+  | "ui.typeset.preset"
+  | "ui.typeset.size"
+  | "ui.typeset.leading"
+  | "ui.typeset.flow";
 
 export const FORM_LABELS: Record<FormLabelKey, string> = {
   // Provider
@@ -191,6 +196,13 @@ export const FORM_LABELS: Record<FormLabelKey, string> = {
   "ui.renderMessage": "Render message override",
   "ui.renderHeader": "Render header override",
   "ui.renderFooter": "Render footer override",
+
+  // UI - Markdown typeset
+  "ui.typeset.enabled": "Markdown typeset",
+  "ui.typeset.preset": "Markdown preset",
+  "ui.typeset.size": "Markdown base size",
+  "ui.typeset.leading": "Markdown line height",
+  "ui.typeset.flow": "Markdown block spacing",
 };
 
 /**
