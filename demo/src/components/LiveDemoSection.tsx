@@ -1,7 +1,7 @@
-import { ChatPanel } from "ai-schadcn-chat";
-import type { ChatConfig } from "ai-schadcn-chat";
+import type { ReactElement } from "react";
+import { UnifiedPlayground } from "./UnifiedPlayground";
 
-export function LiveDemoSection({ config }: { config: ChatConfig }) {
+export function LiveDemoSection(): ReactElement {
   return (
     <section id="live-demo" className="px-4 py-16 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-6xl">
@@ -10,22 +10,11 @@ export function LiveDemoSection({ config }: { config: ChatConfig }) {
             Try it live
           </h2>
           <p className="mt-3 text-pretty text-muted-foreground">
-            This is the real{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
-              &lt;ChatPanel /&gt;
-            </code>{" "}
-            component, wired to MiniMax through the OpenAI-compatible protocol — not a screenshot.
+            The real <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">&lt;ChatPanel /&gt;</code>{" "}
+            on the left. Mutate any of the 72 documented fields in the form on the right and watch the panel react in place.
           </p>
         </div>
-
-        <div className="h-[min(760px,80dvh)] w-full">
-          <ChatPanel
-            config={config}
-            layout="panel"
-            className="shadow-2xl"
-            contentClassName="max-w-5xl"
-          />
-        </div>
+        <UnifiedPlayground />
       </div>
     </section>
   );

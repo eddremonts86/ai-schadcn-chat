@@ -1,6 +1,6 @@
 import { useMemo, type ReactElement } from "react";
 import { minimaxApiKey, minimaxBaseUrl } from "./lib/env";
-import { buildCodingBuddyConfig, buildSupportWidgetConfig } from "./lib/chat-configs";
+import { buildSupportWidgetConfig } from "./lib/chat-configs";
 import { useMiniMaxProviderSync } from "./hooks/useMiniMaxProviderSync";
 import { SiteNav } from "./components/SiteNav";
 import { Hero } from "./components/Hero";
@@ -23,7 +23,6 @@ export default function App(): ReactElement {
   const apiKey = minimaxApiKey();
   useMiniMaxProviderSync(apiKey, minimaxBaseUrl());
 
-  const codingBuddyConfig = useMemo(() => buildCodingBuddyConfig(), []);
   const supportConfig = useMemo(() => buildSupportWidgetConfig(), []);
 
   return (
@@ -32,7 +31,7 @@ export default function App(): ReactElement {
       <main>
         <Hero />
         <FeatureGrid />
-        <LiveDemoSection config={codingBuddyConfig} />
+        <LiveDemoSection />
       </main>
       <SiteFooter />
       <SupportWidget config={supportConfig} />
