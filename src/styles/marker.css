@@ -1,0 +1,68 @@
+/*
+ * shadcn/marker utilities — stylesheet shipped with the package so the
+ * Marker component's streaming-text shimmer effect and variant
+ * separators/borders render correctly.
+ *
+ * Vendored from https://github.com/shadcn-ui/ui/blob/main/packages/shadcn/src/tailwind.css
+ * (the .shimmer utility class) and translated to plain CSS that works
+ * in any consumer project.
+ */
+
+@property --shimmer-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 20deg;
+}
+@property --shimmer-image {
+  syntax: "*";
+  inherits: false;
+}
+@property --shimmer-text-fill {
+  syntax: "*";
+  inherits: false;
+}
+
+@keyframes tw-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* Default shimmer — a diagonal highlight that travels left-to-right
+   across the text. The "from" color is the muted-foreground so the
+   effect reads as a soft glow. Override --shimmer-angle and
+   --shimmer-image on a parent to customize. */
+.shimmer {
+  background-image: var(
+    --shimmer-image,
+    linear-gradient(
+      var(--shimmer-angle, 20deg),
+      hsl(var(--muted-foreground) / 0) 0%,
+      hsl(var(--muted-foreground) / 0.5) 50%,
+      hsl(var(--muted-foreground) / 0) 100%
+    )
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: var(
+    --shimmer-text-fill,
+    hsl(var(--muted-foreground) / 0.5)
+  );
+  color: var(
+    --shimmer-text-fill,
+    hsl(var(--muted-foreground) / 0.5)
+  );
+  animation: tw-shimmer 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
