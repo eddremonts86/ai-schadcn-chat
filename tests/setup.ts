@@ -40,6 +40,18 @@ if (typeof globalThis !== "undefined") {
     // @ts-expect-error - assigning to globalThis for jsdom
     globalThis.IntersectionObserver = MockIntersectionObserver;
   }
+  // jsdom doesn't ship scrollIntoView. Radix's anchor-positioning code
+  // calls it during measurement; without the shim, mounting any
+  // popover/dropdown in a test throws "candidate?.scrollIntoView is
+  // not a function".
+  if (
+    typeof Element !== "undefined" &&
+    !("scrollIntoView" in Element.prototype)
+  ) {
+    Element.prototype.scrollIntoView = function scrollIntoView() {
+      /* no-op in jsdom */
+    };
+  }
   if (!("ResizeObserver" in globalThis)) {
     class MockResizeObserver {
       observe() {}

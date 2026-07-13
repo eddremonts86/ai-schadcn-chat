@@ -8,6 +8,23 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
+      // Specific subpath imports MUST come before the bare "ai-schadcn-chat"
+      // alias — Vite walks aliases in declaration order and the bare entry
+      // would otherwise swallow every "ai-schadcn-chat/<subpath>" import.
+      "ai-schadcn-chat/hooks": resolve(__dirname, "./src/hooks/index.ts"),
+      "ai-schadcn-chat/providers": resolve(__dirname, "./src/providers/index.ts"),
+      "ai-schadcn-chat/lib": resolve(__dirname, "./src/lib/index.ts"),
+      "ai-schadcn-chat/types": resolve(__dirname, "./src/types/index.ts"),
+      "ai-schadcn-chat/components": resolve(
+        __dirname,
+        "./src/components/index.ts",
+      ),
+      "ai-schadcn-chat/typeset.css": resolve(__dirname, "./src/styles/typeset.css"),
+      "ai-schadcn-chat/typeset-presets.css": resolve(
+        __dirname,
+        "./src/styles/typeset-presets.css",
+      ),
+      "ai-schadcn-chat": resolve(__dirname, "./src/index.ts"),
     },
   },
   test: {
