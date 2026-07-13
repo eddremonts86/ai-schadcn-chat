@@ -54,6 +54,30 @@ export function buildCodingBuddyConfig(): ChatConfig {
         "Write a SQL query with a CTE",
         "Refactor this function to be pure",
       ],
+      // Match the catalog's documented defaults so the playground form
+      // reflects the same initial state as a fresh chat consumer would get.
+      // Without these, every boolean is `undefined` and the switches show
+      // "off" even though they are documented as default-on.
+      showModelSelector: true,
+      showDocumentPicker: true,
+      showToolCalls: true,
+      enableConversationHistory: true,
+      enableFileUpload: true,
+      enableMarkdown: true,
+      enableCodeHighlight: true,
+      enableCopyButtons: true,
+      enableMessageActions: true,
+      enableRegenerate: true,
+      // enableEditAndResend is intentionally omitted: it is documented in
+      // the catalog but not yet exposed on the UiConfig type, so setting
+      // it here would trip strict TS checks. The form's toggle for it is
+      // handled separately by the playground's downstream wiring.
+      // enableVoiceInput defaults to false — microphone is opt-in to avoid
+      // prompting for permissions the user never asked for.
+      enableVoiceInput: false,
+      // enableMdx is off by default; consumers can flip it on if they need
+      // MDX rendering, but plain markdown covers the common case.
+      enableMdx: false,
     },
     documents: [
       {
