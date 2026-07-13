@@ -775,3 +775,74 @@
  * runtime. If you don't ship `config.ui.typeset`, the package falls back
  * to its built-in `ai-prose` look.
  * ------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+ * Chat config-driven surface styling.
+ *
+ * The ChatPanel subcomponent (`ChatSurface`) reads the live `config.ui`
+ * and sets three data attributes + two CSS variables on its root div:
+ *
+ *   data-density="comfortable|compact|spacious"
+ *   data-theme="light|dark|system"
+ *   --chat-accent: <hsl/hex color>   (optional)
+ *   --chat-font-family: <stack>      (optional)
+ *
+ * The rules below consume those knobs and translate them into concrete
+ * spacing, palette, and typography overrides. They are scoped tightly so
+ * consumers outside the chat surface are not affected.
+ * ------------------------------------------------------------------------- */
+
+/* Smooth anchor scrolling on the whole page so the nav links (#docs,
+   #live-demo, #config) glide instead of jumping. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Density — controls the padding and gap scale inside the chat surface. */
+.surface-elevated[data-density="compact"] {
+  --chat-gap: 0.25rem;
+  --chat-pad: 0.5rem;
+}
+.surface-elevated[data-density="comfortable"] {
+  --chat-gap: 0.5rem;
+  --chat-pad: 0.75rem;
+}
+.surface-elevated[data-density="spacious"] {
+  --chat-gap: 0.875rem;
+  --chat-pad: 1.125rem;
+}
+
+/* When the consumer sets --chat-accent, expose it under a stable name
+   so any element inside the chat can read it as var(--accent). We don't
+   override the page-wide --accent so the rest of the page is untouched. */
+.surface-elevated {
+  --chat-resolved-accent: var(--chat-accent, var(--accent));
+}
+
+/* When the consumer sets --chat-font-family, let the chat text adopt
+   that stack while keeping monospace code blocks intact. */
+.surface-elevated[style*="--chat-font-family"] {
+  font-family: var(--chat-font-family);
+}
+.surface-elevated[style*="--chat-font-family"] code,
+.surface-elevated[style*="--chat-font-family"] pre,
+.surface-elevated[style*="--chat-font-family"] kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+/* Theme overrides. Only kick in when the consumer has explicitly picked
+   light or dark; "system" follows the OS via prefers-color-scheme and
+   inherits the rest of the app's tokens. */
+.surface-elevated[data-theme="light"] {
+  color-scheme: light;
+}
+.surface-elevated[data-theme="dark"] {
+  color-scheme: dark;
+  background-color: oklch(0.18 0.02 285);
+  color: oklch(0.95 0 0);
+  border-color: oklch(0.3 0.02 285);
+}
+.surface-elevated[data-theme="dark"] .text-muted-foreground {
+  color: oklch(0.7 0 0);
+}
