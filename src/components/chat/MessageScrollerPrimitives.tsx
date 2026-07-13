@@ -50,6 +50,17 @@ export interface MessageScrollerProviderProps {
   scrollEdgeThreshold?: number;
   scrollPreviousItemPeek?: number;
   scrollMargin?: number;
+  /**
+   * Opaque signal that changes whenever the last message's content
+   * changes (new token, edit, or appended child). The provider uses
+   * it as the dep for the auto-scroll effect so that streaming
+   * re-runs the effect without a global store subscription.
+   *
+   * Most callers pass `messages.at(-1)?.id ?? ""` (or any
+   * monotonically-changing value) — anything that React can compare
+   * with Object.is.
+   */
+  contentSignal?: string | number;
   children?: React.ReactNode;
 }
 
@@ -147,7 +158,13 @@ function useScrollerContext() {
 /* -------------------------------------------------------------------------- */
 
 export function MessageScrollerProvider(props: MessageScrollerProviderProps) {
-  const { autoScroll = false, defaultScrollPosition = "end", children } = props;
+  const {
+    autoScroll = false,
+    defaultScrollPosition = "end",
+    scrollEdgeThreshold = 4,
+    contentSignal = "",
+    children,
+  } = props;
 
   const stateStoreRef = React.useRef<ScrollerStore | null>(null);
   if (stateStoreRef.current === null) stateStoreRef.current = new ScrollerStore();
@@ -174,7 +191,15 @@ export function MessageScrollerProvider(props: MessageScrollerProviderProps) {
       if (align === "end") target = top + item.element.offsetHeight - vp.clientHeight;
       else if (align === "center")
         target = top + item.element.offsetHeight / 2 - vp.clientHeight / 2;
-      vp.scrollTo({ top: Math.max(0, target), behavior: opts.behavior ?? "smooth" });
+      target = Math.max(0, target);
+      // Use the modern scrollTo() when available (real browsers, jsdom
+      // for testing). Fall back to setting scrollTop directly because
+      // jsdom's pre-24 implementations did not implement scrollTo.
+      if (typeof vp.scrollTo === "function") {
+        vp.scrollTo({ top: target, behavior: opts.behavior ?? "smooth" });
+      } else {
+        vp.scrollTop = target;
+      }
     },
     [],
   );
@@ -223,6 +248,36 @@ export function MessageScrollerProvider(props: MessageScrollerProviderProps) {
   React.useEffect(() => {
     stateStoreRef.current!.setState({ autoScroll });
   }, [autoScroll]);
+
+  // Content-driven auto-scroll. When the parent signals that the
+  // last message's content changed (new token, edit, or a new
+  // message appended), and the user is currently at the bottom edge
+  // of the viewport, snap to the new bottom. The threshold is
+  // configurable via `scrollEdgeThreshold` (default 4px — "I was
+  // at the edge"); a wider threshold feels jumpy. Critically, this
+  // effect is content-driven (deps: `contentSignal`, `autoScroll`)
+  // and does NOT subscribe to the global state store, so other
+  // consumers' state changes cannot trigger scroll-to-bottom.
+  const scrollToEndRef = React.useRef(scrollToEnd);
+  React.useEffect(() => {
+    scrollToEndRef.current = scrollToEnd;
+  }, [scrollToEnd]);
+
+  React.useEffect(() => {
+    if (!autoScroll) return;
+    const store = stateStoreRef.current!;
+    // Use rAF so we read scrollHeight after the new content has
+    // been laid out. Without this, scrollHeight is from the
+    // previous render and we under-scroll.
+    const raf = requestAnimationFrame(() => {
+      const s = store.getState();
+      if (!s.viewportEl) return;
+      const distance = s.scrollHeight - s.scrollTop - s.viewportHeight;
+      if (distance > scrollEdgeThreshold) return;
+      scrollToEndRef.current({ behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [autoScroll, contentSignal, scrollEdgeThreshold, stateStoreRef]);
 
   const ctxValue = React.useMemo(
     () => ({
@@ -340,7 +395,13 @@ const Viewport = React.forwardRef<HTMLDivElement, MessageScrollerViewportProps>(
       return () => stateStore.setState({ viewportEl: null });
     }, [stateStore]);
 
-    // Observe scroll + resize.
+    // Observe scroll + resize. The Content component is responsible
+    // for content-driven events (new messages, streaming deltas);
+    // the MutationObserver on the viewport was removed in the
+    // scroll-flicker fix because it fired on every character
+    // appended during streaming, which re-rendered all
+    // useSyncExternalStore consumers (Header, JumpButton) and
+    // caused visible scroll position drift.
     React.useLayoutEffect(() => {
       const node = internalRef.current;
       if (!node) return;
@@ -356,30 +417,13 @@ const Viewport = React.forwardRef<HTMLDivElement, MessageScrollerViewportProps>(
       const ro = new ResizeObserver(update);
       ro.observe(node);
 
-      // Also watch content mutations (new messages / size changes).
-      const mo = new MutationObserver(update);
-      mo.observe(node, { childList: true, subtree: true, characterData: true });
-
       // Initial measurement.
       update();
 
       return () => {
         node.removeEventListener("scroll", update);
         ro.disconnect();
-        mo.disconnect();
       };
-    }, [stateStore]);
-
-    // Auto-scroll to bottom while user is at the edge and autoScroll is on.
-    React.useEffect(() => {
-      const unsubscribe = stateStore.subscribe(() => {
-        const s = stateStore.getState();
-        if (!s.viewportEl || !s.autoScroll) return;
-        const distance = s.scrollHeight - s.scrollTop - s.viewportHeight;
-        if (distance > 80) return;
-        s.viewportEl.scrollTop = s.scrollHeight;
-      });
-      return unsubscribe;
     }, [stateStore]);
 
     return (
@@ -388,7 +432,6 @@ const Viewport = React.forwardRef<HTMLDivElement, MessageScrollerViewportProps>(
         onScroll={(e) => {
           onScroll?.(e);
         }}
-        data-autoscrolling="false"
         {...rest}
       >
         {children}
@@ -402,9 +445,109 @@ const Viewport = React.forwardRef<HTMLDivElement, MessageScrollerViewportProps>(
 /* -------------------------------------------------------------------------- */
 
 const Content = React.forwardRef<HTMLDivElement, MessageScrollerContentProps>(
-  function ({ children, ...rest }, ref) {
+  function Content({ children, ...rest }, ref) {
+    const internalRef = React.useRef<HTMLDivElement | null>(null);
+    const { stateStore } = useScrollerContext();
+    // The most recent scrollTop we saw while the user was at the
+    // top edge. When new content is prepended, we bump scrollTop by
+    // the height delta so the previously-first visible item stays in
+    // the same visual position.
+    const lastTopEdgeRef = React.useRef<{ scrollTop: number; scrollHeight: number } | null>(
+      null,
+    );
+    const previousChildrenRef = React.useRef<React.ReactNode>(children);
+
+    const setRefs = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        internalRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      },
+      [ref],
+    );
+
+    // When the children change (e.g. a prepend or a re-keyed swap),
+    // detect a height delta and bump scrollTop so the user keeps
+    // their reading position. This is the standard "infinite scroll"
+    // pattern: capture scrollTop + scrollHeight before, after the
+    // children have laid out, restore scrollTop + delta.
+    //
+    // We only preserve position when the user was near the top
+    // (within 8px). At the bottom we don't need preservation because
+    // the auto-scroll effect already handles that case; in the
+    // middle of the transcript we also skip — a mid-scroll prepend
+    // is a layout choice the consumer made deliberately, and
+    // preserving position there is more confusing than helpful.
+    React.useEffect(() => {
+      const node = internalRef.current;
+      if (!node) return;
+      const prev = lastTopEdgeRef.current;
+      const prevChildren = previousChildrenRef.current;
+      // Update the ref BEFORE measurement so a strict-mode
+      // double-invocation in dev doesn't apply the delta twice.
+      previousChildrenRef.current = children;
+      // Skip the very first render — lastTopEdgeRef is null and we
+      // have no baseline to compare against.
+      if (!prev || prevChildren === children) {
+        return;
+      }
+      const newHeight = node.scrollHeight;
+      const delta = newHeight - prev.scrollHeight;
+      if (delta <= 0) {
+        // Height shrank or stayed the same — nothing to do.
+        return;
+      }
+      // Only preserve when the user was at the top edge. A small
+      // tolerance (8px) covers the "I scrolled to the very top"
+      // case without false positives for users a few pixels off.
+      if (prev.scrollTop > 8) return;
+      // Defer to the next frame so the new content has actually
+      // laid out before we measure newHeight. Without rAF, scrollHeight
+      // reflects the stale content and the delta is 0.
+      const raf = requestAnimationFrame(() => {
+        if (!internalRef.current) return;
+        // Re-read after the frame to capture the actual final height.
+        const finalHeight = internalRef.current.scrollHeight;
+        const finalDelta = finalHeight - prev.scrollHeight;
+        if (finalDelta > 0) {
+          internalRef.current.scrollTop = prev.scrollTop + finalDelta;
+          // Tell the store so the viewport's height readers see the
+          // new value on the next render.
+          stateStore.setState({
+            scrollTop: prev.scrollTop + finalDelta,
+            scrollHeight: finalHeight,
+          });
+        }
+      });
+      return () => cancelAnimationFrame(raf);
+    }, [children, stateStore]);
+
+    // Track the most recent top-edge sample. We update on scroll
+    // (via a passive listener) and on the initial mount, but only
+    // capture the sample when the user is near the top. The next
+    // prepend effect then uses the last sample to restore.
+    React.useLayoutEffect(() => {
+      const node = internalRef.current;
+      if (!node) return;
+      const sample = () => {
+        lastTopEdgeRef.current = {
+          scrollTop: node.scrollTop,
+          scrollHeight: node.scrollHeight,
+        };
+      };
+      // Initial sample once layout is done.
+      const raf = requestAnimationFrame(sample);
+      node.addEventListener("scroll", sample, { passive: true });
+      return () => {
+        cancelAnimationFrame(raf);
+        node.removeEventListener("scroll", sample);
+      };
+    }, []);
+
     return (
-      <div ref={ref} {...rest}>
+      <div ref={setRefs} {...rest}>
         {children}
       </div>
     );

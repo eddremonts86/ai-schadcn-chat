@@ -271,13 +271,8 @@
   contain: content;
 }
 
-/* When the viewport is auto-scrolling (the engine called
-   MessageScroller.scrollTo), hide the scrollbar so the snap doesn't
-   flash. The MessageScroller primitives set data-autoscrolling on the
-   viewport during programmatic scrolls. */
-[data-autoscrolling] {
-  scrollbar-width: none;
-}
-[data-autoscrolling]::-webkit-scrollbar {
-  display: none;
-}
+/* The [data-autoscrolling] rule was removed. The viewport no longer
+   sets the attribute (it was a placeholder for an unfinished feature)
+   and consumers should not depend on scrollbar-hide via that path.
+   The "scrollbar-none" utility is still available for callers that
+   need a permanent scrollbar hide. */
