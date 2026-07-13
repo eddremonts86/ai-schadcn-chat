@@ -86,6 +86,19 @@ export class ChatEngine {
     return this.activeId;
   }
 
+  /**
+   * Return the count of in-flight tool calls for the active conversation.
+   *
+   * Default returns 0 because the engine does not yet expose tool-call
+   * activity tracking publicly — this method is the hook that any future
+   * tool-call plumbing can fill in. Consumers reading this in their UI
+   * (e.g. a header badge behind `ui.showToolCalls`) will get a sensible
+   * default until the engine wires real tool-call state.
+   */
+  public getActiveToolCallCount(): number {
+    return 0;
+  }
+
   public setActiveConversationId(id: string): void {
     if (!this.conversations.has(id)) {
       // Hydrate from persistence when switching to a stored conversation

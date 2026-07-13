@@ -200,6 +200,12 @@ export interface UiConfig {
   enableMessageActions?: boolean;
   enableConversationHistory?: boolean;
   enableRegenerate?: boolean;
+  /**
+   * Whether each message exposes an "edit and resend" action. Defaults to true
+   * to match the catalog; flip off to hide the button in the per-message
+   * overflow menu.
+   */
+  enableEditAndResend?: boolean;
   enableEdit?: boolean;
   maxFileSizeMb?: number;
   acceptedFileTypes?: string[];
