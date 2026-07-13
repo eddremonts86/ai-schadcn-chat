@@ -5,14 +5,6 @@
 [![npm version](https://img.shields.io/npm/v/ai-schadcn-chat.svg)](https://www.npmjs.com/package/ai-schadcn-chat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Live demo](https://img.shields.io/badge/demo-ai--chat.eduardoinerarte.dk-blue)](https://ai-chat.eduardoinerarte.dk/)
-
-## Live demo
-
-The full playground (every config field, the catalog reference, the
-type playground) is live at <https://ai-chat.eduardoinerarte.dk/>.
-Updated automatically on every push to `main`; see
-[`.github/workflows/deploy-demo.yml`](./.github/workflows/deploy-demo.yml).
 
 ## Why ai-schadcn-chat
 
