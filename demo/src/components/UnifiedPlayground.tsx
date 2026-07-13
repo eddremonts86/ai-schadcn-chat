@@ -1,9 +1,4 @@
-import {
-  useDeferredValue,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { ChevronDown, Cpu, KeyRound, LayoutDashboard, Server, Shield, Sliders, User } from "lucide-react";
 import {
   Collapsible,
@@ -75,11 +70,13 @@ export function UnifiedPlayground(): ReactElement {
       </div>
 
       {/* Mobile drawer */}
-      <Collapsible open={drawerOpen} onOpenChange={setDrawerOpen} className="lg:hidden">
-        <CollapsibleContent className="mt-3 rounded-2xl border border-border/60 bg-card/60 p-4">
-          <ConfigForm />
-        </CollapsibleContent>
-      </Collapsible>
+      <div className="mt-3 lg:hidden">
+        {drawerOpen && (
+          <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
+            <ConfigForm />
+          </div>
+        )}
+      </div>
     </ChatProvider>
   );
 }
@@ -1002,12 +999,17 @@ function TextField({
   onChange: (v: string) => void;
   helpText?: string;
 }): ReactElement {
+  // Single source of truth: the engine value, reflected by `value`. We
+  // debounce a local draft only to keep the input feel fluid while the
+  // engine propagates; we never overwrite the engine value from this
+  // component. The bug we are fixing was: useEffect([deferred]) fired
+  // for *every* TextField in the form on every parent re-render (48+
+  // re-fires per keystroke), each one calling onChange with its own
+  // stale field value, churning the config and eventually leaving
+  // ui.title unchanged.
   const [draft, setDraft] = useState(value);
-  const deferred = useDeferredValue(draft);
-  useEffect(() => {
-    onChange(deferred);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferred]);
+  // Sync draft to incoming value when the engine updates (e.g. from a
+  // preset click), but only if the user isn't mid-typing.
   useEffect(() => {
     setDraft(value);
   }, [value]);
@@ -1015,7 +1017,11 @@ function TextField({
     <FieldShell label={label} helpText={helpText}>
       <Input
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          const next = e.target.value;
+          setDraft(next);
+          onChange(next);
+        }}
         className="h-8 font-mono text-xs"
       />
     </FieldShell>
@@ -1036,11 +1042,6 @@ function TextAreaField({
   helpText?: string;
 }): ReactElement {
   const [draft, setDraft] = useState(value);
-  const deferred = useDeferredValue(draft);
-  useEffect(() => {
-    onChange(deferred);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferred]);
   useEffect(() => {
     setDraft(value);
   }, [value]);
@@ -1048,7 +1049,11 @@ function TextAreaField({
     <FieldShell label={label} helpText={helpText} vertical>
       <textarea
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          const next = e.target.value;
+          setDraft(next);
+          onChange(next);
+        }}
         rows={rows}
         className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-xs"
       />
@@ -1091,12 +1096,6 @@ function NumberField({
   helpText?: string;
 }): ReactElement {
   const [draft, setDraft] = useState(String(value));
-  const deferred = useDeferredValue(draft);
-  useEffect(() => {
-    const n = Number(deferred);
-    if (!Number.isNaN(n)) onChange(n);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deferred]);
   useEffect(() => {
     setDraft(String(value));
   }, [value]);
@@ -1106,7 +1105,12 @@ function NumberField({
         type="number"
         step={step}
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          const next = e.target.value;
+          setDraft(next);
+          const n = Number(next);
+          if (!Number.isNaN(n)) onChange(n);
+        }}
         className="h-8 font-mono text-xs"
       />
     </FieldShell>
