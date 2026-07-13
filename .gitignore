@@ -28,6 +28,9 @@ demo/.env
 # typescript
 *.tsbuildinfo
 
+# Local pack dry-run tarballs (never commit these)
+*.tgz
+
 # tests / coverage
 coverage
 
