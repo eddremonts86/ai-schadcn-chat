@@ -68,7 +68,13 @@ export class ChatEngine {
     return this.config;
   }
 
-  public updateConfig(partial: Partial<ChatConfig>): void {
+  public updateConfig(partial: Partial<ChatConfig>): void;
+  public updateConfig(updater: (current: ChatConfig) => Partial<ChatConfig>): void;
+  public updateConfig(
+    arg: Partial<ChatConfig> | ((current: ChatConfig) => Partial<ChatConfig>),
+  ): void {
+    const partial =
+      typeof arg === "function" ? arg(this.config) : arg;
     this.config = { ...this.config, ...partial };
     if (partial.provider || partial.model) {
       this.provider = createProvider(this.config);

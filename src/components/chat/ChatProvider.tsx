@@ -20,7 +20,18 @@ import { buildDefaultMiniMaxConfig } from "../../types/presets.js";
 export interface ChatContextValue {
   engine: ChatEngineImpl;
   config: ChatConfig;
-  updateConfig: (partial: Partial<ChatConfig>) => void;
+  /**
+   * Update the active config. Two overloads:
+   *   - `updateConfig(partial)` — shallow-merge partial into the current config.
+   *   - `updateConfig(updater)` — functional form, receives the current
+   *     config and returns the partial to merge. Use this when the partial
+   *     needs to read the current config (avoids stale-closure bugs in
+   *     long-lived form components).
+   */
+  updateConfig(partial: Partial<ChatConfig>): void;
+  updateConfig(
+    updater: (current: ChatConfig) => Partial<ChatConfig>,
+  ): void;
   messages: ChatMessage[];
   isStreaming: boolean;
   conversationId: string;
@@ -111,9 +122,16 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
     getIsStreaming,
   );
 
-  const updateConfig = useCallback((partial: Partial<ChatConfig>) => {
-    engineRef.current!.updateConfig(partial);
-  }, []);
+  const updateConfig = useCallback(
+    (
+      arg:
+        | Partial<ChatConfig>
+        | ((current: ChatConfig) => Partial<ChatConfig>),
+    ) => {
+      engineRef.current!.updateConfig(arg as never);
+    },
+    [],
+  );
 
   const setConversationId = useCallback((id: string) => {
     engineRef.current!.setActiveConversationId(id);
