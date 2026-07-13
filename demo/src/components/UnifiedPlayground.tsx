@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactElement } from "react";
-import { ChevronDown, Cpu, KeyRound, LayoutDashboard, Server, Shield, Sliders, User } from "lucide-react";
+import { ChevronDown, Cpu, KeyRound, LayoutDashboard, Lock, Server, Shield, Sliders, User } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -427,7 +427,18 @@ function FieldControl({
     return (
       <ReadOnlyNote
         label={label}
-        text={`${config.documents?.length ?? 0} document(s) configured. Edit the JSON in the source code — the form treats documents as structured objects that don't fit a single text field.`}
+        reason="Array of structured objects — no single input can hold the shape."
+        path="documents: ContextDocument[]"
+        codeExample={`defaultConfig({
+  documents: [
+    {
+      id: "project-notes",
+      name: "Project notes",
+      alwaysOn: true,
+      body: ["# Notes\\n", "Always-on context."],
+    },
+  ],
+})`}
       />
     );
   }
@@ -453,7 +464,19 @@ function FieldControl({
   }
   if (field.path === "thinking") {
     return (
-      <ReadOnlyNote label={label} text="Anthropic extended thinking. Configure via the code path; the form treats it as a structured object." />
+      <ReadOnlyNote
+        label={label}
+        reason="Anthropic extended thinking is a structured object (type, budget_tokens). The form treats it as opaque to avoid lying about the shape."
+        path="provider.thinking?: { type, budget_tokens }"
+        codeExample={`defaultConfig({
+  provider: {
+    thinking: {
+      type: "enabled",
+      budget_tokens: 1024,
+    },
+  },
+})`}
+      />
     );
   }
   if (field.path === "stopSequences") {
@@ -540,7 +563,21 @@ function FieldControl({
     );
   }
   if (field.path === "onResponse" || field.path === "onError") {
-    return <ReadOnlyNote label={label} text="Closures cannot be set from a form. Pass via defaultConfig({ onResponse, onError }) in your app code." />;
+    return (
+    <ReadOnlyNote
+      label={label}
+      reason="Closures can't be edited from the DOM. Pass them when you build the engine."
+      path="onResponse?: (chunk, ctx) => void"
+      codeExample={`defaultConfig({
+  onResponse: (chunk, ctx) => {
+    if (chunk.type === "text") console.log(chunk.delta);
+  },
+  onError: (err, ctx) => {
+    if (err.retryable) ctx.retry();
+  },
+})`}
+    />
+  );
   }
 
   // Personality & tools
@@ -620,7 +657,21 @@ function FieldControl({
     return (
       <ReadOnlyNote
         label={label}
-        text={`${config.tools?.length ?? 0} tool(s) registered. Tool handlers are closures — set them via defaultConfig({ tools: [...] }) in your app code.`}
+        reason={`${config.tools?.length ?? 0} tool(s) registered. Tool handlers are closures — the form can't bind functions, so you set them once when the engine is built.`}
+        path="tools: ToolDefinition[]"
+        codeExample={`defaultConfig({
+  tools: [
+    {
+      name: "search_docs",
+      description: "Search the project documentation.",
+      parameters: { type: "object", properties: { q: { type: "string" } } },
+      execute: async ({ q }) => {
+        const docs = await fetch(\`/api/docs?q=\${q}\`).then((r) => r.json());
+        return docs;
+      },
+    },
+  ],
+})`}
       />
     );
   }
@@ -681,7 +732,27 @@ function FieldControl({
     );
   }
   if (field.path === "ui.emptyState") {
-    return <ReadOnlyNote label={label} text="Custom ReactNode. Set via defaultConfig({ ui: { emptyState: <MyComponent /> } }) in your app code." />;
+    return (
+      <ReadOnlyNote
+        label={label}
+        reason="A ReactNode that the chat renders before the first message. Components can't be serialized into a form."
+        path="ui.emptyState?: ReactNode"
+        codeExample={`import { Sparkles } from "lucide-react";
+
+defaultConfig({
+  ui: {
+    emptyState: (
+      <div className="flex flex-col items-center gap-2 p-6 text-center">
+        <Sparkles className="size-6 text-primary" />
+        <p className="text-sm text-muted-foreground">
+          Ask me anything — try "Explain useEffect".
+        </p>
+      </div>
+    ),
+  },
+})`}
+      />
+    );
   }
 
   // UI - toggles
@@ -863,7 +934,27 @@ function FieldControl({
     field.path === "ui.renderHeader" ||
     field.path === "ui.renderFooter"
   ) {
-    return <ReadOnlyNote label={label} text="Render slot. Pass a function via defaultConfig({ ui: { renderMessage: (msg) => … } }) in your app code." />;
+    return (
+      <ReadOnlyNote
+        label={label}
+        reason={`Render slots are functions. Pass them via defaultConfig to override how messages, the header, or the footer render.`}
+        path={`ui.${field.path}: (props) => ReactNode`}
+        codeExample={`defaultConfig({
+  ui: {
+    renderMessage: (msg, defaultRender) => {
+      if (msg.role === "assistant") {
+        return (
+          <div className="rounded-xl border border-primary/40 bg-primary/5 p-3">
+            {defaultRender(msg)}
+          </div>
+        );
+      }
+      return defaultRender(msg);
+    },
+  },
+})`}
+      />
+    );
   }
 
   // UI - Markdown typeset (shadcn/typeset)
@@ -981,7 +1072,15 @@ function FieldControl({
 
   // Unknown field type — keep the form compiling even when the catalog
   // grows ahead of this dispatcher.
-  return <ReadOnlyNote label={label} text={`No form control implemented yet for type "${field.type}". See the reference docs below.`} />;
+  return (
+      <ReadOnlyNote
+        label={label}
+        reason={`No form control implemented yet for type "${field.type}". The catalog documents this field but the playground doesn't have a matching input.`}
+        path={field.path}
+        codeExample={`// Set ${field.path} via updateConfig inside your app:
+chat.updateConfig({ ${field.path.split(".")[0]}: { ${field.path.split(".").slice(1).join(".")}: /* your value */ } });`}
+      />
+    );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1168,15 +1267,77 @@ function SelectField({
 
 function ReadOnlyNote({
   label,
-  text,
+  reason,
+  path,
+  codeExample,
 }: {
   label: string;
-  text: string;
+  /**
+   * Plain-language reason the form cannot edit this field. Keep it short
+   * ("Closures can't be edited via DOM", "Nested structured object",
+   * etc.) — it shows next to the field's label.
+   */
+  reason: string;
+  /** The config path (e.g. `ui.renderMessage`). Shown as monospace. */
+  path?: string;
+  /**
+   * A copyable code snippet showing how to set the value in your app
+   * code. The note renders a small "Copy" button next to it.
+   */
+  codeExample?: string;
 }): ReactElement {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    if (!codeExample) return;
+    try {
+      void navigator.clipboard?.writeText(codeExample);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
   return (
-    <FieldShell label={label} helpText={text} vertical>
-      <div className="rounded-md border border-dashed border-border/60 bg-muted/20 px-2 py-1.5 text-xs text-muted-foreground">
-        {text}
+    <FieldShell label={label} vertical>
+      <div
+        className="rounded-md border border-dashed border-border/60 bg-muted/30 px-2.5 py-2 text-xs text-muted-foreground"
+        role="note"
+        aria-label={`${label} is read-only: ${reason}`}
+      >
+        <div className="flex items-start gap-2">
+          <Lock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/70" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full border border-border/70 bg-background px-1.5 py-0.5 font-medium text-[10px] uppercase tracking-wide text-muted-foreground">
+                Code-only
+              </span>
+              <span>{reason}</span>
+            </div>
+            {path && (
+              <div className="text-[11px]">
+                <span className="text-muted-foreground/70">config path:</span>{" "}
+                <code className="rounded bg-muted/60 px-1 py-0.5 font-mono text-foreground">
+                  {path}
+                </code>
+              </div>
+            )}
+            {codeExample && (
+              <div className="relative rounded border border-border/60 bg-background/60 px-2 py-1.5">
+                <pre className="overflow-x-auto whitespace-pre pr-12 font-mono text-[11px] leading-relaxed text-foreground">
+                  {codeExample}
+                </pre>
+                <button
+                  type="button"
+                  onClick={copy}
+                  aria-label="Copy code example"
+                  className="absolute right-1 top-1 rounded border border-border/60 bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                >
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </FieldShell>
   );
