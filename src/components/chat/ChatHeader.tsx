@@ -15,6 +15,7 @@ import {
   Settings2,
   Sparkles,
   Trash2,
+  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import { useChat } from "../../hooks/useChat.js";
@@ -388,6 +389,28 @@ export function ChatHeader({ className }: ChatHeaderProps) {
         )}
 
         <ThemeToggle className="rounded-lg text-muted-foreground hover:text-foreground" />
+
+        {/* Tool-calls badge. Reads from the engine via getActiveToolCallCount()
+            (defaults to 0 today). The badge only renders when the count is
+            non-zero so the header stays quiet for chat configs that don't
+            use tool calls at all. */}
+        {showToolCalls && chat.getActiveToolCallCount() > 0 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="inline-flex h-7 items-center gap-1 rounded-lg border border-border/60 bg-card/60 px-2 text-xs font-medium text-muted-foreground"
+                aria-label={`${chat.getActiveToolCallCount()} tool calls in progress`}
+              >
+                <Wrench className="size-3.5 animate-pulse" />
+                <span className="font-mono">{chat.getActiveToolCallCount()}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {chat.getActiveToolCallCount()} tool call
+              {chat.getActiveToolCallCount() === 1 ? "" : "s"} in progress
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         {/* Overflow */}
         <DropdownMenu>
