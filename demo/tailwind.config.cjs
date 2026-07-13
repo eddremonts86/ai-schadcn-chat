@@ -1,15 +1,37 @@
-// CommonJS form: the package root declares "type": "module", but
-// tailwind's loader compiles `tailwind.config.js` via its own
-// require() bridge, which expects CommonJS exports. We keep the
-// `module.exports` form here and silence the ESLint warning about it.
+// Paths are resolved against the demo's Vite project root, not the
+// process cwd. Inside `pnpm exec vite build --config demo/vite.config.ts`
+// the Vite project root is /app/demo/, so `./src/**` resolves to
+// /app/demo/src/, but `src/**` (no leading dot) would resolve to the
+// package source at /app/src because that's where the process happens
+// to be. We expand the package source path with an absolute, glob-
+// safe entry so Tailwind v3's micromatch-based content scanner finds
+// the package source regardless of cwd.
+const path = require("node:path");
+const pkgRoot = path.resolve(__dirname, "..");
+
 const config = {
   darkMode: ["class"],
   content: [
+    // Files inside the demo itself.
     "./index.html",
     "./src/**/*.{ts,tsx}",
-    // Pull the package's source through Tailwind so utility classes used by
-    // ChatPanel/ChatComposer/MessageBubble/etc. get generated too.
-    "../src/**/*.{ts,tsx}",
+    // The package source that the demo imports via aliases. Without
+    // this entry, every utility class used in <ChatPanel />,
+    // <ChatHeader />, <Markdown />, etc. is dropped from the build
+    // and the entire layout collapses to naked HTML. We list each
+    // sub-tree the package source lives under, explicitly, instead of
+    // one giant glob — Tailwind's default scanner does not follow
+    // symlinks and may not always resolve parent-relative globs in
+    // every build path (especially under Docker where `..` was
+    // ambiguous in the prior iteration).
+    `${pkgRoot}/src/components/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/hooks/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/lib/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/providers/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/types/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/utils/**/*.{ts,tsx}`,
+    `${pkgRoot}/src/index.ts`,
+    `${pkgRoot}/src/index.tsx`,
   ],
   theme: {
     container: {
@@ -118,7 +140,4 @@ const config = {
   plugins: [],
 };
 
-// eslint-disable-next-line no-undef
 module.exports = config;
-
-console.error("TAILWIND-CONFIG-LOADED content=" + JSON.stringify(config.content));
