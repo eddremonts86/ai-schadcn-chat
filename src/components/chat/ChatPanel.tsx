@@ -9,7 +9,7 @@ import { ChatComposer } from "./ChatComposer.js";
 import { MessageList } from "./MessageList.js";
 import { cn } from "../../lib/utils.js";
 import type { ChatConfig } from "../../types/chat.js";
-import { ChatProvider } from "./ChatProvider.js";
+import { ChatProvider, useOptionalChat } from "./ChatProvider.js";
 
 export interface ChatPanelProps {
   /** Inline config. Mutate at runtime via `useChat().updateConfig`. */
@@ -40,7 +40,7 @@ export interface ChatPanelProps {
  * MessageList + Composer. For full control, compose the primitives
  * yourself and only wrap with <ChatProvider config={…} />.
  */
-export function ChatPanel(props: ChatPanelProps) {
+export function ChatPanel(props: ChatPanelProps): ReactNode {
   const {
     config,
     layout = "panel",
@@ -60,20 +60,26 @@ export function ChatPanel(props: ChatPanelProps) {
         ? "flex h-full w-full flex-col app-mesh"
         : "flex h-full w-full flex-col overflow-hidden rounded-2xl surface-elevated app-mesh";
 
-  return (
-    <ChatProvider config={config}>
-      <TooltipProvider delayDuration={200}>
-        <div className={cn(containerClasses, className)} style={style}>
-          {renderHeader ? (
-            renderHeader()
-          ) : hideHeader ? null : (
-            <ChatHeader />
-          )}
-          <MessageList contentClassName={contentClassName} />
-          {renderFooter ? renderFooter() : null}
-          {hideComposer ? null : <ChatComposer contentClassName={contentClassName} />}
-        </div>
-      </TooltipProvider>
-    </ChatProvider>
+  // If a parent already provided a ChatProvider (we are nested), use it
+  // and skip the internal one — otherwise the form mutates the outer
+  // engine but the header/list/composer inside this panel read from the
+  // inner engine, and the two would silently diverge. When there's no
+  // parent provider we create one so the panel works standalone too.
+  const outer = useOptionalChat();
+  const tree = (
+    <TooltipProvider delayDuration={200}>
+      <div className={cn(containerClasses, className)} style={style}>
+        {renderHeader ? (
+          renderHeader()
+        ) : hideHeader ? null : (
+          <ChatHeader />
+        )}
+        <MessageList contentClassName={contentClassName} />
+        {renderFooter ? renderFooter() : null}
+        {hideComposer ? null : <ChatComposer contentClassName={contentClassName} />}
+      </div>
+    </TooltipProvider>
   );
+  if (outer) return tree;
+  return <ChatProvider config={config}>{tree}</ChatProvider>;
 }
