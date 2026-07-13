@@ -6,6 +6,37 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 
+## Demo
+
+The package ships with a full interactive demo at `demo/`. Build it
+locally with:
+
+```bash
+pnpm install
+pnpm exec vite --config demo/vite.config.ts build
+# static output → demo/dist/
+```
+
+The published `dist/` and `demo/dist/` are independent artifacts — the
+package and the demo do not need each other at install time. The demo
+imports `ai-schadcn-chat` from npm (see `demo/package.json`) so the
+deployed demo bundle does not require the package source on the
+server.
+
+## Deployment
+
+The demo ships as a static SPA. Two paths to get it to a host:
+
+1. **Coolify (self-hosted PaaS on Hetzner VPS)** — `Dockerfile` and
+   `docker-compose.prod.yml` at the repo root, ready to wire as a new
+   Coolify application with `build_pack=dockerfile` and host
+   `ai-chat.eduardoinerarte.dk`. A push to `main` triggers a rebuild
+   via the Coolify GitHub webhook.
+2. **Static host** (Nginx / Caddy / Cloudflare Pages / S3) — run the
+   build command above, upload `demo/dist/` to the host, point
+   `ai-chat.eduardoinerarte.dk` at it via wildcard DNS or a
+   dedicated A record.
+
 ## Why ai-schadcn-chat
 
 - **Three surfaces, one package** — drop in `<ChatPanel />` for an instant chat UI, compose `<ChatProvider />` + `<MessageList />` + `<ChatComposer />` for a custom layout, or use the framework-agnostic `ChatEngine` class without React at all.
