@@ -64,6 +64,16 @@ export function ChatHeader({ className }: ChatHeaderProps) {
     agents.find((a) => a.id === activeAgentId) ??
     agents.find((a) => a.name === cfg.personality?.name);
 
+  // ui.* visibility flags the user can toggle from the playground form.
+  // Default every chip to visible so out-of-the-box behaviour matches the
+  // previous always-render header. Setting any of these to false hides the
+  // corresponding control cluster; the brand mark, new-chat button, theme
+  // toggle, and overflow menu stay always-on.
+  const showModelSelector = ui.showModelSelector ?? true;
+  const showDocumentPicker = ui.showDocumentPicker ?? true;
+  const showToolCalls = ui.showToolCalls ?? true;
+  const enableConversationHistory = ui.enableConversationHistory ?? true;
+
   const applyAgent = (agent: Agent) => {
     chat.updateConfig({
       systemPrompt: agent.systemPrompt,
@@ -158,7 +168,7 @@ export function ChatHeader({ className }: ChatHeaderProps) {
 
       <div className="flex items-center gap-0.5">
         {/* Agents menu */}
-        {(ui.showModelSelector ?? true) && (
+        {showModelSelector && (
           <DropdownMenu open={agentsOpen} onOpenChange={setAgentsOpen}>
             <DropdownMenuTrigger asChild>
               <Button
@@ -208,7 +218,7 @@ export function ChatHeader({ className }: ChatHeaderProps) {
         )}
 
         {/* Documents menu */}
-        {(ui.showDocumentPicker ?? true) && (
+        {showDocumentPicker && (
           <DropdownMenu open={docsOpen} onOpenChange={setDocsOpen}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -296,7 +306,7 @@ export function ChatHeader({ className }: ChatHeaderProps) {
         </Tooltip>
 
         {/* Conversation history */}
-        {(ui.enableConversationHistory ?? true) && (
+        {enableConversationHistory && (
           <DropdownMenu>
             <Tooltip>
               <TooltipTrigger asChild>
