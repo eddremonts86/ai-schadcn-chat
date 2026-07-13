@@ -68,10 +68,7 @@ export function buildCodingBuddyConfig(): ChatConfig {
       enableCopyButtons: true,
       enableMessageActions: true,
       enableRegenerate: true,
-      // enableEditAndResend is intentionally omitted: it is documented in
-      // the catalog but not yet exposed on the UiConfig type, so setting
-      // it here would trip strict TS checks. The form's toggle for it is
-      // handled separately by the playground's downstream wiring.
+      enableEditAndResend: true,
       // enableVoiceInput defaults to false — microphone is opt-in to avoid
       // prompting for permissions the user never asked for.
       enableVoiceInput: false,
