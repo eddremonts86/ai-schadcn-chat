@@ -24,7 +24,7 @@
 //   them inside `dist/package.json` would be redundant at best and
 //   contradictory at worst.
 
-import { readFile, writeFile, copyFile, access } from "node:fs/promises";
+import { mkdir, readFile, writeFile, copyFile, access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,8 +36,9 @@ const distPkgPath = resolve(distDir, "package.json");
 const distStylesPath = resolve(distDir, "styles.css");
 const distTypesetPath = resolve(distDir, "typeset.css");
 const distTypesetPresetsPath = resolve(distDir, "typeset-presets.css");
-const distScrollerPath = resolve(distDir, "scroller.css");
-const distMarkerPath = resolve(distDir, "marker.css");
+const distStylesDir = resolve(distDir, "styles");
+const distScrollerPath = resolve(distStylesDir, "scroller.css");
+const distMarkerPath = resolve(distStylesDir, "marker.css");
 const srcStylesPath = resolve(rootDir, "src/styles/typeset.css");
 const srcTypesetPresetsPath = resolve(rootDir, "src/styles/typeset-presets.css");
 const srcScrollerPath = resolve(rootDir, "src/styles/scroller.css");
@@ -83,6 +84,11 @@ async function main() {
   // Vite bundles its own styles.css but these are separate vendor files we
   // ship as-is. typeset-presets.css is opt-in (only import if you want the
   // preset catalog baked in).
+  // Copy typeset.css + typeset-presets.css into dist/ so the package can
+  // ship them via the "./typeset.css" and "./typeset-presets.css" subpath
+  // exports. Vite bundles its own styles.css but these are separate vendor
+  // files we ship as-is. typeset-presets.css is opt-in (only import if
+  // you want the preset catalog baked in).
   try {
     await copyFile(srcStylesPath, distTypesetPath);
     console.log(`postbuild: copied ${srcStylesPath} -> ${distTypesetPath}`);
@@ -97,10 +103,18 @@ async function main() {
     console.error(`postbuild: failed to copy typeset-presets.css: ${err.message}`);
     process.exit(1);
   }
-  // Copy scroller.css + marker.css into dist/. The MessageScroller and
-  // Marker components import these at module load, so consumers do not
-  // have to wire the CSS themselves. Vendored from shadcn-rhea; see the
-  // file headers for the upstream link.
+
+  // Copy scroller.css + marker.css into dist/styles/. The MessageScroller
+  // and MessageMarker components import them at module load with a
+  // relative path that resolves to dist/styles/<name>.css when the
+  // consumer imports the package — both via the npm-installed
+  // .pnpm/ai-schadcn-chat/dist/components/chat/MessageMarker.js (where
+  // 'import "../../styles/marker.css"' traverses up to the
+  // dist/styles/marker.css) and via the demo when running against the
+  // source tree. Keeping the CSS under dist/styles/ matches the source
+  // shape at src/styles/ so the relative path is correct in both build
+  // and consumption modes.
+  mkdir(distStylesDir, { recursive: true });
   try {
     await copyFile(srcScrollerPath, distScrollerPath);
     console.log(`postbuild: copied ${srcScrollerPath} -> ${distScrollerPath}`);
