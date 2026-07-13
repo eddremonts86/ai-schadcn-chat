@@ -28,6 +28,12 @@ import {
   useMessageScrollerScrollable,
   useMessageScrollerVisibility,
 } from "./MessageScrollerPrimitives.js";
+// Side-effect import: load the scroll-fade + scrollbar utilities so
+// consumers do not have to wire the CSS by hand. The MessageScroller
+// viewport relies on `scroll-fade-b`, `scrollbar-thin`,
+// `scrollbar-gutter-stable`, `overscroll-contain`, and
+// `data-autoscrolling:scrollbar-none` to look right.
+import "../../styles/scroller.css";
 
 function MessageScrollerProvider(
   props: React.ComponentProps<typeof MessageScrollerPrimitive.Provider>,

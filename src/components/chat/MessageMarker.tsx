@@ -15,6 +15,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "../../lib/utils.js";
+// Side-effect: load the shimmer + marker CSS so consumers do not have
+// to wire it manually. Vendored in src/styles/marker.css and shipped
+// from dist/marker.css. Resolved relative to the package source so
+// the import works whether consumers consume via the package's exports
+// map (which sets `sideEffects: ["**/*.css"]`) or via the demo's
+// direct import of the source.
+import "../../styles/marker.css";
 
 const markerVariants = cva(
   "group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-sm text-muted-foreground [&_svg:not([class*='size-'])]:size-4 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground",
