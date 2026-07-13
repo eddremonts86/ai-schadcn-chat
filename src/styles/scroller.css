@@ -1,0 +1,283 @@
+/*
+ * shadcn/scroller utilities — stylesheet shipped with the package so
+ * MessageScroller (and any other scrollable surface) gets the right
+ * affordances without the consumer having to wire each one
+ * manually.
+ *
+ * Vendored from https://github.com/shadcn-ui/ui/blob/main/packages/shadcn/src/tailwind.css
+ * and translated from Tailwind v4's `@utility`/`@theme inline` syntax
+ * to plain CSS that works in any consumer project. The package's
+ * MessageScrollerViewport applies the following utility classes:
+ *
+ *   scroll-fade-b            - bottom fade mask
+ *   scrollbar-thin           - 8px slim scrollbar
+ *   scrollbar-gutter-stable  - reserve scrollbar space (no layout shift)
+ *   overscroll-contain       - block scroll chaining
+ *   contain-content           - CSS containment for perf
+ *   data-autoscrolling:scrollbar-none  - hide scrollbar mid-autoscroll
+ *
+ * Keep this file in sync with the upstream shadcn CSS. When shadcn
+ * publishes a change, copy the new versions verbatim and update the
+ * `Vendored from` link above.
+ */
+
+@property --scroll-fade-t {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-b {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-s {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-e {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-mask {
+  syntax: "*";
+  inherits: false;
+}
+
+@keyframes scroll-fade-reveal-t {
+  from {
+    --scroll-fade-t: 0px;
+  }
+  to {
+    --scroll-fade-t: var(
+      --_scroll-fade-size-t,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+  }
+}
+@keyframes scroll-fade-reveal-b {
+  from {
+    --scroll-fade-b: var(
+      --_scroll-fade-size-b,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+  }
+  to {
+    --scroll-fade-b: 0px;
+  }
+}
+@keyframes scroll-fade-reveal-s {
+  from {
+    --scroll-fade-s: 0px;
+  }
+  to {
+    --scroll-fade-s: var(
+      --_scroll-fade-size-s,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+  }
+}
+@keyframes scroll-fade-reveal-e {
+  from {
+    --scroll-fade-e: var(
+      --_scroll-fade-size-e,
+      var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+    );
+  }
+  to {
+    --scroll-fade-e: 0px;
+  }
+}
+
+/* Vertical (top + bottom) fade — the "scroll-fade-b" variant is a
+   shorthand that only fades the bottom edge. The "y" / "scroll-fade"
+   variants fade both edges. */
+.scroll-fade-y,
+.scroll-fade {
+  --_scroll-fade-size-t: var(
+    --scroll-fade-t-size,
+    var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+  );
+  --_scroll-fade-size-b: var(
+    --scroll-fade-b-size,
+    var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+  );
+  --scroll-fade-block: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--scroll-fade-t, 0px),
+    #000 calc(100% - var(--scroll-fade-b, 0px)),
+    transparent 100%
+  );
+  -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+  mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.scroll-fade-b {
+  --_scroll-fade-size-b: var(
+    --scroll-fade-b-size,
+    var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+  );
+  --scroll-fade-block: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 0,
+    #000 calc(100% - var(--scroll-fade-b, 0px)),
+    transparent 100%
+  );
+  -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+  mask-image: var(--scroll-fade-mask, var(--scroll-fade-block));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-fade-y,
+  .scroll-fade {
+    animation:
+      scroll-fade-reveal-t 1ms ease-in-out,
+      scroll-fade-reveal-b 1ms ease-in-out;
+    animation-timeline: scroll(self y), scroll(self y);
+    animation-range:
+      0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24)),
+      calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+        100%;
+    animation-fill-mode: both;
+  }
+  .scroll-fade-b {
+    animation: scroll-fade-reveal-b 1ms ease-in-out;
+    animation-timeline: scroll(self y);
+    animation-range:
+      0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24));
+    animation-fill-mode: both;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .scroll-fade-y,
+  .scroll-fade {
+    --scroll-fade-t: var(--_scroll-fade-size-t);
+    --scroll-fade-b: var(--_scroll-fade-size-b);
+  }
+  .scroll-fade-b {
+    --scroll-fade-b: var(--_scroll-fade-size-b);
+  }
+}
+
+/* Horizontal (start + end) fade. */
+.scroll-fade-x {
+  --_scroll-fade-size-s: var(
+    --scroll-fade-s-size,
+    var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+  );
+  --_scroll-fade-size-e: var(
+    --scroll-fade-e-size,
+    var(--scroll-fade-size, min(12%, calc(var(--spacing, 0.25rem) * 10)))
+  );
+  --scroll-fade-inline: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--scroll-fade-s, 0px),
+    #000 calc(100% - var(--scroll-fade-e, 0px)),
+    transparent 100%
+  );
+  -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-fade-x {
+    animation:
+      scroll-fade-reveal-s 1ms ease-in-out,
+      scroll-fade-reveal-e 1ms ease-in-out;
+    animation-timeline: scroll(self inline), scroll(self inline);
+    animation-range:
+      0 var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24)),
+      calc(
+          100% - var(--scroll-fade-reveal, calc(var(--spacing, 0.25rem) * 24))
+        )
+        100%;
+    animation-fill-mode: both;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .scroll-fade-x {
+    --scroll-fade-s: var(--_scroll-fade-size-s);
+    --scroll-fade-e: var(--_scroll-fade-size-e);
+  }
+}
+
+/* Scrollbar utilities. The .scrollbar-thin variant is what the package's
+   MessageScrollerViewport uses by default. */
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.35);
+  border-radius: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Gutter-stable: reserve scrollbar space so layouts don't shift when
+   the user opens/closes a scrollable area. Most browsers implement
+   this via `scrollbar-gutter: stable`, with a fallback for older
+   Firefox via reserved space. */
+.scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
+}
+@supports not (scrollbar-gutter: stable) {
+  .scrollbar-gutter-stable {
+    overflow-y: scroll;
+  }
+}
+
+/* Overscroll / contain — small but important for chat surfaces where
+   scrolling past the top or bottom should not leak to the page. */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+.overscroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+.overscroll-y-contain {
+  overscroll-behavior-y: contain;
+}
+.contain-content {
+  contain: content;
+}
+
+/* When the viewport is auto-scrolling (the engine called
+   MessageScroller.scrollTo), hide the scrollbar so the snap doesn't
+   flash. The MessageScroller primitives set data-autoscrolling on the
+   viewport during programmatic scrolls. */
+[data-autoscrolling] {
+  scrollbar-width: none;
+}
+[data-autoscrolling]::-webkit-scrollbar {
+  display: none;
+}

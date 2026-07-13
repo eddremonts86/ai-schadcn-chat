@@ -36,8 +36,12 @@ const distPkgPath = resolve(distDir, "package.json");
 const distStylesPath = resolve(distDir, "styles.css");
 const distTypesetPath = resolve(distDir, "typeset.css");
 const distTypesetPresetsPath = resolve(distDir, "typeset-presets.css");
+const distScrollerPath = resolve(distDir, "scroller.css");
+const distMarkerPath = resolve(distDir, "marker.css");
 const srcStylesPath = resolve(rootDir, "src/styles/typeset.css");
 const srcTypesetPresetsPath = resolve(rootDir, "src/styles/typeset-presets.css");
+const srcScrollerPath = resolve(rootDir, "src/styles/scroller.css");
+const srcMarkerPath = resolve(rootDir, "src/styles/marker.css");
 
 const DESIRED = {
   type: "module",
@@ -91,6 +95,24 @@ async function main() {
     console.log(`postbuild: copied ${srcTypesetPresetsPath} -> ${distTypesetPresetsPath}`);
   } catch (err) {
     console.error(`postbuild: failed to copy typeset-presets.css: ${err.message}`);
+    process.exit(1);
+  }
+  // Copy scroller.css + marker.css into dist/. The MessageScroller and
+  // Marker components import these at module load, so consumers do not
+  // have to wire the CSS themselves. Vendored from shadcn-rhea; see the
+  // file headers for the upstream link.
+  try {
+    await copyFile(srcScrollerPath, distScrollerPath);
+    console.log(`postbuild: copied ${srcScrollerPath} -> ${distScrollerPath}`);
+  } catch (err) {
+    console.error(`postbuild: failed to copy scroller.css: ${err.message}`);
+    process.exit(1);
+  }
+  try {
+    await copyFile(srcMarkerPath, distMarkerPath);
+    console.log(`postbuild: copied ${srcMarkerPath} -> ${distMarkerPath}`);
+  } catch (err) {
+    console.error(`postbuild: failed to copy marker.css: ${err.message}`);
     process.exit(1);
   }
 
