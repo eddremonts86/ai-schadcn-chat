@@ -76,8 +76,8 @@ describe("scroller + marker styles are shipped with the package", () => {
       await readFile(resolve(pkgRoot, "package.json"), "utf8"),
     );
     const exports = pkg.exports ?? {};
-    expect(exports["./scroller.css"]).toBe("./dist/scroller.css");
-    expect(exports["./marker.css"]).toBe("./dist/marker.css");
+    expect(exports["./scroller.css"]).toBe("./dist/styles/scroller.css");
+    expect(exports["./marker.css"]).toBe("./dist/styles/marker.css");
   });
 
   it("MessageScroller viewport applies scroll-fade-b + scrollbar utilities (smoke)", () => {
