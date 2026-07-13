@@ -80,8 +80,21 @@ export function MessageList({ className, contentClassName }: MessageListProps) {
   const chat = useChat();
   const messages = chat.messages;
 
+  // contentSignal fires the provider's auto-scroll effect whenever
+  // the last message identity changes OR a streaming token arrives.
+  // We use a tuple of (lastId, lastContentLength) so the signal
+  // bumps on both new messages and incremental token deltas.
+  const lastMessage = messages.at(-1);
+  const contentSignal = lastMessage
+    ? `${lastMessage.id}:${lastMessage.content?.length ?? 0}`
+    : "";
+
   return (
-    <MessageScrollerProvider autoScroll defaultScrollPosition="end">
+    <MessageScrollerProvider
+      autoScroll
+      defaultScrollPosition="end"
+      contentSignal={contentSignal}
+    >
       <MessageScroller className={cn("relative flex-1", className)}>
         {messages.length === 0 ? (
           <MessageScrollerViewport>
