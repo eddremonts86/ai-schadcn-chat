@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -108,6 +109,24 @@ export function MessageInput(props: MessageInputProps) {
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState<AttachmentMeta[]>([]);
   const [uploadingCount, setUploadingCount] = useState(0);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileErrorTimerRef = useRef<number | null>(null);
+
+  const flashFileError = (msg: string) => {
+    setFileError(msg);
+    if (fileErrorTimerRef.current !== null) {
+      window.clearTimeout(fileErrorTimerRef.current);
+    }
+    fileErrorTimerRef.current = window.setTimeout(() => setFileError(null), 4000);
+  };
+  useEffect(
+    () => () => {
+      if (fileErrorTimerRef.current !== null) {
+        window.clearTimeout(fileErrorTimerRef.current);
+      }
+    },
+    [],
+  );
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -207,9 +226,41 @@ export function MessageInput(props: MessageInputProps) {
   const onFiles = useCallback(
     async (files: FileList | File[]) => {
       const list = Array.from(files);
-      setUploadingCount((n) => n + list.length);
+      const maxMb = ui.maxFileSizeMb ?? 10;
+      const acceptedTypes = ui.acceptedFileTypes ?? [];
+      const oversized = list.filter((f) => f.size > maxMb * 1024 * 1024);
+      const rejected = oversized.length > 0;
+      const filtered = oversized.length > 0
+        ? list.filter((f) => f.size <= maxMb * 1024 * 1024)
+        : list;
+      const filteredByType =
+        acceptedTypes.length > 0
+          ? filtered.filter((f) =>
+              acceptedTypes.some((t) => f.type === t || f.type.startsWith(`${t}/`)),
+            )
+          : filtered;
+      const mimeRejected = filtered.length - filteredByType.length;
+      if (rejected || mimeRejected > 0) {
+        const reasons: string[] = [];
+        if (rejected) {
+          reasons.push(
+            `${oversized.length} file${oversized.length === 1 ? "" : "s"} over ${maxMb} MB`,
+          );
+        }
+        if (mimeRejected > 0) {
+          reasons.push(
+            `${mimeRejected} file${mimeRejected === 1 ? "" : "s"} with unsupported type`,
+          );
+        }
+        const msg = `Rejected ${reasons.join(" and ")}.`;
+        // eslint-disable-next-line no-console
+        console.warn(`[MessageInput] ${msg}`, { maxMb, acceptedTypes });
+        flashFileError(msg);
+        if (filteredByType.length === 0) return;
+      }
+      setUploadingCount((n) => n + filteredByType.length);
       try {
-        const atts = await filesToAttachments(list, cfg);
+        const atts = await filesToAttachments(filteredByType, cfg);
         setAttachments((prev) => [...prev, ...atts]);
       } catch (err) {
         chat.config.onError?.(
@@ -223,10 +274,16 @@ export function MessageInput(props: MessageInputProps) {
           { conversationId: chat.conversationId },
         );
       } finally {
-        setUploadingCount((n) => Math.max(0, n - list.length));
+        setUploadingCount((n) => Math.max(0, n - filteredByType.length));
       }
     },
-    [cfg, chat.config, chat.conversationId],
+    [
+      cfg,
+      chat.config,
+      chat.conversationId,
+      ui.maxFileSizeMb,
+      ui.acceptedFileTypes,
+    ],
   );
 
   const onFileInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -429,6 +486,15 @@ export function MessageInput(props: MessageInputProps) {
         </kbd>{" "}
         for a new line
       </p>
+
+      {fileError && (
+        <p
+          role="status"
+          className="mx-auto mt-1 max-w-3xl px-1 text-center text-[11px] text-destructive"
+        >
+          {fileError}
+        </p>
+      )}
 
       {dragOver && (
         <div className="pointer-events-none absolute inset-2 flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 text-sm font-medium text-primary backdrop-blur-sm">
