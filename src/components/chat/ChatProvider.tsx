@@ -47,6 +47,8 @@ export interface ChatContextValue {
   deleteConversation: (id: string) => void;
   listConversations: () => string[];
   listConversationsMeta: () => ConversationMeta[];
+  /** Count of in-flight tool calls for the active conversation. */
+  getActiveToolCallCount: () => number;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -164,6 +166,10 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
     () => engineRef.current!.listConversationsMeta(),
     [],
   );
+  const getActiveToolCallCount = useCallback(
+    () => engineRef.current!.getActiveToolCallCount(),
+    [],
+  );
 
   const value = useMemo<ChatContextValue>(
     () => ({
@@ -185,6 +191,7 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
       deleteConversation,
       listConversations,
       listConversationsMeta,
+      getActiveToolCallCount,
     }),
     [
       config,
@@ -204,6 +211,7 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
       deleteConversation,
       listConversations,
       listConversationsMeta,
+      getActiveToolCallCount,
     ],
   );
 
