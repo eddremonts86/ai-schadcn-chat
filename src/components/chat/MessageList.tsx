@@ -310,6 +310,9 @@ function MessageItem({ message, isStreaming }: MessageItemProps) {
             showTimestamp={ui.showTimestamps ?? true}
             onEdit={isUser ? () => setEditing(true) : undefined}
             onDelete={() => chat.deleteMessage(message.id)}
+            showActions={ui.enableMessageActions ?? true}
+            showRegenerate={ui.enableRegenerate ?? true}
+            showEdit={isUser && (ui.enableEditAndResend ?? true)}
           />
         )}
 
@@ -343,6 +346,9 @@ function MessageActions({
   showTimestamp,
   onEdit,
   onDelete,
+  showActions = true,
+  showRegenerate = true,
+  showEdit = true,
 }: {
   message: ChatMessage;
   copyText: string;
@@ -351,6 +357,9 @@ function MessageActions({
   showTimestamp: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  showActions?: boolean;
+  showRegenerate?: boolean;
+  showEdit?: boolean;
 }) {
   const chat = useChat();
   const [copied, setCopied] = useState(false);
@@ -368,6 +377,8 @@ function MessageActions({
 
   const btn = "size-7 text-muted-foreground hover:bg-foreground/10 hover:text-foreground";
 
+  if (!showActions) return null;
+
   return (
     <MessageFooter
       className={cn(
@@ -378,12 +389,12 @@ function MessageActions({
       <Button type="button" variant="ghost" size="icon-sm" onClick={copy} aria-label="Copy message" className={btn}>
         {copied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
       </Button>
-      {isAssistant && (
+      {isAssistant && showRegenerate && (
         <Button type="button" variant="ghost" size="icon-sm" onClick={() => void chat.regenerate()} aria-label="Regenerate response" className={btn}>
           <RotateCcw className="size-3.5" />
         </Button>
       )}
-      {isUser && onEdit && (
+      {isUser && onEdit && showEdit && (
         <Button type="button" variant="ghost" size="icon-sm" onClick={onEdit} aria-label="Edit message" className={btn}>
           <Pencil className="size-3.5" />
         </Button>
@@ -524,6 +535,9 @@ function MessageBody({
   // ChatProvider (e.g. in tests) — we fall back to the legacy look in that case.
   const chatCtx = useOptionalChat();
   const typeset = chatCtx?.config.ui?.typeset;
+  const ui = chatCtx?.config.ui ?? {};
+  const enableCodeHighlight = ui.enableCodeHighlight ?? true;
+  const enableCopyButtons = ui.enableCopyButtons ?? true;
   if (message.role === "tool") {
     return (
       <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs">
@@ -534,7 +548,15 @@ function MessageBody({
   if (isUser) {
     return <span className="whitespace-pre-wrap break-words">{text}</span>;
   }
-  return <Markdown typeset={typeset}>{text}</Markdown>;
+  return (
+    <Markdown
+      typeset={typeset}
+      enableCodeHighlight={enableCodeHighlight}
+      enableCopyButtons={enableCopyButtons}
+    >
+      {text}
+    </Markdown>
+  );
 }
 
 function humanizeError(error?: ChatError): {
