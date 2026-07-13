@@ -80,6 +80,16 @@ export interface MarkdownProps {
    * want to bypass config plumbing (custom renderers, tests).
    */
   typeset?: TypesetConfig;
+  /**
+   * When false, the syntax-highlight plugin is skipped. Defaults to true
+   * (highlights are on). Consumers wire this from `config.ui.enableCodeHighlight`.
+   */
+  enableCodeHighlight?: boolean;
+  /**
+   * When false, the per-code-block Copy button is omitted. Defaults to
+   * true. Consumers wire this from `config.ui.enableCopyButtons`.
+   */
+  enableCopyButtons?: boolean;
 }
 
 /**
@@ -112,17 +122,27 @@ export const Markdown = memo(function Markdown({
   children,
   className,
   typeset,
+  enableCodeHighlight = true,
+  enableCopyButtons = true,
 }: MarkdownProps) {
   const containerClass = typesetClassName(typeset);
   const containerStyle = typesetInlineStyle(typeset);
+  // rehypePlugins: omit `rehype-highlight` when `enableCodeHighlight` is off.
+// react-markdown's Pluggable[] type is `[Plugin, ...params]`; we cast so we
+// can branch at runtime without TypeScript narrowing the array shape.
+const rehypePlugins = (
+  enableCodeHighlight
+    ? [rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]
+    : [rehypeRaw]
+) as Parameters<typeof ReactMarkdown>[0]["rehypePlugins"];
   return (
     <div
       className={cn(containerClass, className)}
       style={containerStyle}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={rehypePlugins}
         components={{
           p: ({ children }) => <p className="my-2.5">{children}</p>,
           a: ({ children, href }) => (
@@ -220,7 +240,9 @@ export const Markdown = memo(function Markdown({
                   <span className="font-mono text-[11px] font-medium uppercase tracking-wide text-white/50">
                     {lang || "code"}
                   </span>
-                  <CopyButton getText={() => nodeToText(children)} />
+                  {enableCopyButtons && (
+                    <CopyButton getText={() => nodeToText(children)} />
+                  )}
                 </div>
                 <pre className="overflow-x-auto px-4 py-3 text-[0.8125rem] leading-relaxed text-white/90 [&_code]:bg-transparent [&_code]:p-0">
                   {children}
