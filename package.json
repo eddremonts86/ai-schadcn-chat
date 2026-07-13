@@ -83,7 +83,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "demo": "vite --config demo/vite.config.ts",
-    "build": "tsc -p tsconfig.build.json && vite build && node ./scripts/postbuild.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node ./scripts/postbuild.mjs",
     "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly --outDir dist",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
