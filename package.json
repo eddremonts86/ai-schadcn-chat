@@ -69,8 +69,8 @@
     "./styles.css": "./dist/styles.css",
     "./typeset.css": "./dist/typeset.css",
     "./typeset-presets.css": "./dist/typeset-presets.css",
-    "./scroller.css": "./dist/scroller.css",
-    "./marker.css": "./dist/marker.css"
+    "./scroller.css": "./dist/styles/scroller.css",
+    "./marker.css": "./dist/styles/marker.css"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
