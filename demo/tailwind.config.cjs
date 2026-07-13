@@ -1,12 +1,8 @@
-import type { Config } from "tailwindcss";
-
-// The ai-schadcn-chat package's components (ChatHeader, ChatComposer,
-// MessageBubble, Markdown, ThinkingDots, …) reference utility classes
-// like `bg-background`, `text-foreground`, `border-border`, plus the
-// keyframes `accordion-down`, `accordion-up`, `thinking-dot`, `fade-in`,
-// `slide-up`, and `caret-blink`. Those must be defined in the consumer's
-// Tailwind config — which is what this file does.
-const config: Config = {
+// CommonJS form: the package root declares "type": "module", but
+// tailwind's loader compiles `tailwind.config.js` via its own
+// require() bridge, which expects CommonJS exports. We keep the
+// `module.exports` form here and silence the ESLint warning about it.
+const config = {
   darkMode: ["class"],
   content: [
     "./index.html",
@@ -30,7 +26,6 @@ const config: Config = {
         primary: {
           DEFAULT: "oklch(var(--primary) / <alpha-value>)",
           foreground: "oklch(var(--primary-foreground) / <alpha-value>)",
-          2: "oklch(var(--primary-2) / <alpha-value>)",
         },
         secondary: {
           DEFAULT: "oklch(var(--secondary) / <alpha-value>)",
@@ -40,7 +35,6 @@ const config: Config = {
           DEFAULT: "oklch(var(--destructive) / <alpha-value>)",
           foreground: "oklch(var(--destructive-foreground) / <alpha-value>)",
         },
-        success: "oklch(var(--success) / <alpha-value>)",
         muted: {
           DEFAULT: "oklch(var(--muted) / <alpha-value>)",
           foreground: "oklch(var(--muted-foreground) / <alpha-value>)",
@@ -57,19 +51,39 @@ const config: Config = {
           DEFAULT: "oklch(var(--card) / <alpha-value>)",
           foreground: "oklch(var(--card-foreground) / <alpha-value>)",
         },
-        chat: {
-          user: "oklch(var(--chat-user) / <alpha-value>)",
-          assistant: "oklch(var(--chat-assistant) / <alpha-value>)",
-          system: "oklch(var(--chat-system) / <alpha-value>)",
-        },
+        success: "oklch(var(--success) / <alpha-value>)",
       },
       borderRadius: {
-        xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 4px)",
-        sm: "calc(var(--radius) - 8px)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
       },
       keyframes: {
+        "thinking-dot": {
+          "0%, 80%, 100%": { opacity: "0.3" },
+          "40%": { opacity: "1" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "caret-blink": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+        "caret-flash": {
+          "0%": { opacity: "0" },
+          "20%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -78,36 +92,33 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "thinking-dot": {
-          "0%, 60%, 100%": { opacity: "0.3", transform: "scale(0.85)" },
-          "30%": { opacity: "1", transform: "scale(1)" },
+        "message-in": {
+          "0%": { opacity: "0", transform: "translateY(6px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
-        "fade-in": {
-          from: { opacity: "0", transform: "translateY(4px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
-        },
-        "slide-up": {
-          from: { opacity: "0", transform: "translateY(8px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
-        },
-        "caret-blink": {
-          "0%, 50%": { opacity: "1" },
-          "50.01%, 100%": { opacity: "0" },
+        shimmer: {
+          "0%": { "background-position": "-200% 0" },
+          "100%": { "background-position": "200% 0" },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
         "thinking-dot": "thinking-dot 1.4s ease-in-out infinite both",
-        "fade-in": "fade-in 200ms ease-out",
-        "slide-up": "slide-up 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "caret-blink": "caret-blink 1s step-end infinite",
+        "thinking-dot-2": "thinking-dot 1.4s ease-in-out infinite both 0.2s",
+        "thinking-dot-3": "thinking-dot 1.4s ease-in-out infinite both 0.4s",
+        "fade-in": "fade-in 200ms ease-out both",
+        "slide-up": "slide-up 200ms ease-out both",
+        "caret-blink": "caret-blink 1s ease-in-out infinite",
+        "caret-flash": "caret-flash 700ms ease-out",
+        "accordion-down": "accordion-down 200ms ease-out",
+        "accordion-up": "accordion-up 200ms ease-out",
+        "message-in": "message-in 180ms ease-out both",
       },
     },
   },
-  // tailwindcss-animate is intentionally NOT included: the package doesn't
-  // actually rely on its classes, and excluding it keeps the bundle minimal.
   plugins: [],
 };
 
-export default config;
+// eslint-disable-next-line no-undef
+module.exports = config;
+
+console.error("TAILWIND-CONFIG-LOADED content=" + JSON.stringify(config.content));
