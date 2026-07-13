@@ -1,0 +1,62 @@
+# =============================================================================
+# docker-compose.prod.yml — Coolify-compatible deploy unit for ai-chat demo.
+#
+# This file is consumed by:
+#   - Coolify (build_pack=dockerfile) on conductor-01
+#   - the iaWorkSpace register-app / generate-compose scripts
+#   - any local developer who runs `docker compose -f
+#     docker-compose.prod.yml up -d`
+#
+# It assumes the Traefik+Let's Encrypt reverse proxy already runs on the
+# host (Coolify sets it up; a local install does too). The labels below
+# route the public hostname `ai-chat.eduardoinerarte.dk` to the demo
+# container's port 80.
+#
+# IMPORTANT: do not put secrets in this file. Coolify injects env vars
+# at runtime; secrets go to the application's Environment Variables
+# panel or are referenced via a managed database service.
+# =============================================================================
+
+services:
+  app:
+    container_name: ai-chat-demo
+    image: ai-schadcn-chat-demo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+    # Traefik labels: declare this service to the host-level reverse
+    # proxy without exposing port 80 directly. Coolify injects the
+    # `traefik` network; if not present (developer machine), the
+    # `networks` block at the bottom falls back to bridge.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ai-chat-demo.rule=Host(`ai-chat.eduardoinerarte.dk`)"
+      - "traefik.http.routers.ai-chat-demo.entrypoints=websecure"
+      - "traefik.http.routers.ai-chat-demo.tls=true"
+      - "traefik.http.routers.ai-chat-demo.tls.certresolver=letsencrypt"
+      # If a second alias is ever wanted (e.g. www. variant), add as
+      # an additional rule on a sibling router — Traefik accepts
+      # multiple Host matchers on a single entrypoint, but a single
+      # rule line cannot list more than one Host without breaking
+      # parsing in older Traefik versions.
+      - "traefik.http.services.ai-chat-demo.loadbalancer.server.port=80"
+
+    networks:
+      - coolify-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  # Coolify's default app network. External so the host-level Traefik
+  # can attach to it. If the operator prefers to declare an alternative
+  # network, they can do so here; Coolify ignores extra networks it did
+  # not provision as long as labels still match.
+  coolify-net:
+    external: true
+    name: coolify
