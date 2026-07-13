@@ -1,0 +1,199 @@
+# Deploy the demo SPA to ai-chat.eduardoinerarte.dk on Hetzner.
+#
+# Trigger: pushes to main (auto) and manual workflow_dispatch (one-shot).
+# Output: /var/www/ai-chat.eduardoinerarte.dk/ on conductor-01, served by
+# the existing nginx + wildcard Let's Encrypt TLS.
+#
+# GitHub Secrets required (set under Settings → Secrets and variables →
+# Actions → Repository secrets):
+#
+#   HETZNER_HOST             hostname or IP of conductor-01 (e.g. "conductor-01")
+#   HETZNER_USER             SSH user with write access to DEPLOY_PATH
+#                            (e.g. "root" or "edd")
+#   HETZNER_SSH_KEY          private OpenSSH key, generated on conductor-01
+#                            with `ssh-keygen -t ed25519 -C "ai-chat-ci"`.
+#                            No passphrase. The PUBLIC counterpart goes in
+#                            /root/.ssh/authorized_keys (or /home/<user>/...).
+#   HETZNER_DEPLOY_PATH      absolute destination directory on the server.
+#                            Default suggestion: /var/www/ai-chat.eduardoinerarte.dk/
+#                            Must exist and be writable by HETZNER_USER.
+#   HETZNER_KNOWN_HOSTS      Output of `ssh-keyscan -t ed25519 $HETZNER_HOST`
+#                            (no leading host). Pin the host key so we never
+#                            hit an MITM prompt.
+#
+# What this workflow does NOT do (intentionally — kept simple):
+#   - Touch nginx config (that lives in version control under
+#     .github/nginx/ and is applied once by hand).
+#   - Run a Node server in production (the demo is a static SPA).
+#   - Provision TLS (the wildcard cert is already on the server).
+#
+# Failure modes worth knowing:
+#   - If HETZNER_DEPLOY_PATH doesn't exist, rsync errors with
+#     "no such file or directory". The workflow bails before any
+#     reload.
+#   - If the build fails, the workflow bails before rsync. The
+#     last deployed files stay live.
+#   - If rsync drops partway, the deploy is half-applied. We
+#     always rsync with --delete --checksum; the next deploy
+#     cleans up partial state.
+
+name: deploy-demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "demo/**"
+      - "src/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-demo.yml"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Plan only (rsync --dry-run)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+
+concurrency:
+  # If a new deploy lands while an old one is still running, cancel
+  # the old one. Last push wins.
+  group: ai-chat-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: build demo and rsync to Hetzner
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment:
+      # The production environment can be configured in the repo
+      # settings to require approval, but defaults to no approval.
+      # If you want a one-click confirmation before each deploy,
+      # add an approval rule to the environment.
+      name: production
+      url: https://ai-chat.eduardoinerarte.dk/
+
+    env:
+      HETZNER_HOST: ${{ secrets.HETZNER_HOST }}
+      HETZNER_USER: ${{ secrets.HETZNER_USER }}
+      HETZNER_DEPLOY_PATH: ${{ secrets.HETZNER_DEPLOY_PATH }}
+      HETZNER_KNOWN_HOSTS: ${{ secrets.HETZNER_KNOWN_HOSTS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the demo
+        # The demo is a Vite SPA that imports the package source via
+        # the alias "ai-schadcn-chat" -> ./src. The demo is not a
+        # workspace member; we build it directly with the vite CLI
+        # using the demo/vite.config.ts. Output goes to demo/dist/
+        # (HTML, JS, CSS, hashed assets). Hashed assets get aggressive
+        # caching in the nginx config; the index.html stays cache-free.
+        run: pnpm exec vite --config demo/vite.config.ts build
+
+      - name: Prepare SSH key
+        # The private key is in a secret. We materialize it on disk
+        # in a known location with 0600 perms, then ssh-agent picks
+        # it up via ssh-add below. We never log the key.
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/ai-chat-deploy
+          chmod 600 ~/.ssh/ai-chat-deploy
+          ssh-keyscan -p 22 -t ed25519 "$HETZNER_HOST" > ~/.ssh/known_hosts 2>/dev/null || true
+          # If the user provided HETZNER_KNOWN_HOSTS we use it verbatim
+          # (it's the canonical source of truth). Otherwise the
+          # ssh-keyscan above is best-effort.
+          if [ -n "$HETZNER_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$HETZNER_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          fi
+          # Quick sanity check that we have at least one pinned host.
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "::error::no SSH known_hosts entry; set HETZNER_KNOWN_HOSTS"
+            exit 1
+          fi
+
+      - name: Verify deploy path exists
+        # Bail with a clear error if HETZNER_DEPLOY_PATH is missing.
+        # We do a single ls; we do not create it from the runner
+        # because the deploy user might not have parent-dir write
+        # permission.
+        run: |
+          ssh -i ~/.ssh/ai-chat-deploy \
+              -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes \
+              "$HETZNER_USER@$HETZNER_HOST" \
+              "test -d '$HETZNER_DEPLOY_PATH' && echo ok || (echo '::error::deploy path missing'; exit 1)"
+
+      - name: Rsync the build
+        # rsync flags explained:
+        #   -a                archive (recursive, perms, times, etc.)
+        #   -v                verbose (one line per file in logs)
+        #   --delete          remove files at the destination that are
+        #                     not in the source — keeps the server
+        #                     matching the build output exactly
+        #   --checksum        skip based on checksum, not mtime — a
+        #                     stale file with new mtime still gets
+        #                     re-uploaded if its content changed
+        #   --exclude '.git'  belt-and-suspenders
+        #   --delay-updates   put new files in place atomically (rename
+        #                     into place) — no half-uploaded assets
+        #   --chmod             strip 0600 from rsync's default; we
+        #                     want the assets world-readable on the
+        #                     server
+        run: |
+          DRY_RUN="${{ inputs.dry_run }}"
+          FLAGS=(-av --delete --checksum --delay-updates --exclude '.git' --chmod=u+rwX,go+rX)
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "::notice::dry-run mode; no files will be written"
+            FLAGS+=(--dry-run)
+          fi
+          rsync "${FLAGS[@]}" \
+            demo/dist/ \
+            "$HETZNER_USER@$HETZNER_HOST:$HETZNER_DEPLOY_PATH"
+
+      - name: Reload nginx (best-effort)
+        # A static-file deploy doesn't strictly need a reload — nginx
+        # serves the new files on the next request. We still reload
+        # because the longest-running workers in some distributions
+        # cache directory mtime for 1s and the operator may want
+        # immediate effect.
+        run: |
+          ssh -i ~/.ssh/ai-chat-deploy \
+              -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes \
+              "$HETZNER_USER@$HETZNER_HOST" \
+              "sudo -n nginx -s reload 2>/dev/null || sudo -n systemctl reload nginx 2>/dev/null || true"
+          echo "nginx reload attempted (errors ignored by design)"
+
+      - name: Smoke test
+        run: |
+          # Hit the public URL and make sure it serves HTML.
+          curl -sSf -o /tmp/index.html -w "HTTP %{http_code}\nbytes: %{size_download}\n" \
+            "https://ai-chat.eduardoinerarte.dk/"
+          head -c 200 /tmp/index.html
+          echo
+          # Quick checks: it really is an index.html with a <title>.
+          grep -q '<title>' /tmp/index.html \
+            && echo "title tag found ✓" \
+            || (echo "::error::no <title> in served index.html"; exit 1)
