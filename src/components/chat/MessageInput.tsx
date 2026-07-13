@@ -21,6 +21,8 @@ import {
   ChevronDown,
   FileText,
   Loader2,
+  Mic,
+  MicOff,
   Paperclip,
   Send,
   Settings2,
@@ -39,6 +41,7 @@ import {
   type ReactNode,
 } from "react";
 import { useChat } from "../../hooks/useChat.js";
+import { useVoiceInput } from "../../lib/voice.js";
 import {
   getActiveProviderId,
   listProviders,
@@ -138,6 +141,25 @@ export function MessageInput(props: MessageInputProps) {
     !disabled &&
     (text.trim().length > 0 || attachments.length > 0);
   const enableFileUpload = ui.enableFileUpload ?? true;
+  const enableVoiceInput = ui.enableVoiceInput ?? false;
+
+  // Voice input: append interim transcripts to the textarea as the user
+  // speaks. When the user clicks the Mic button a second time we stop and
+  // the final transcript is committed to the text state. Errors (no mic
+  // permission, browser unsupported) are surfaced through `voice.error`
+  // and logged; the textarea stays usable.
+  const voice = useVoiceInput({
+    onResult: (transcript) => {
+      // Append the latest transcript to whatever the user has already
+      // typed. This keeps repeated sessions additive (the user can edit
+      // freely between presses) without losing what the recognizer just
+      // produced.
+      setText((prev) => {
+        const sep = prev.length > 0 && !prev.endsWith(" ") ? " " : "";
+        return prev + sep + transcript;
+      });
+    },
+  });
 
   const [providerMgrOpen, setProviderMgrOpen] = useState(false);
   const [providerMgrCreate, setProviderMgrCreate] = useState(false);
@@ -310,6 +332,37 @@ export function MessageInput(props: MessageInputProps) {
                 </TooltipContent>
               </Tooltip>
             </>
+          )}
+
+          {enableVoiceInput && voice.supported && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant={voice.listening ? "destructive" : "ghost"}
+                  size="icon"
+                  className={cn(
+                    "size-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground",
+                    voice.listening && "ring-2 ring-primary/60 animate-pulse",
+                  )}
+                  onClick={() => {
+                    if (voice.listening) voice.stop();
+                    else voice.start();
+                  }}
+                  aria-label={voice.listening ? "Stop dictation" : "Start dictation"}
+                  disabled={disabled}
+                >
+                  {voice.listening ? (
+                    <MicOff className="size-[18px]" />
+                  ) : (
+                    <Mic className="size-[18px]" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {voice.listening ? "Stop dictation" : "Start dictation"}
+              </TooltipContent>
+            </Tooltip>
           )}
 
           <Textarea
