@@ -54,7 +54,32 @@ COPY scripts ./scripts
 # Bootstrap deps. The demo currently uses path aliases to ../src,
 # so all it needs from this layer is the workspace deps.
 # esbuild's postinstall is allowed by pnpm-workspace.yaml -> onlyBuiltDependencies.
-RUN pnpm install --frozen-lockfile
+# We bypass the `prepare` lifecycle hook on purpose — `prepare` triggers
+# `vite build` (library mode) which writes to /app/dist, and the demo
+# build below shares /app/.vite/ cache keys with that run, leading to
+# a stale Tailwind class scanner. Disabling here, building explicitly
+# afterward, sidesteps the whole interaction.
+RUN pnpm install --ignore-scripts --frozen-lockfile
+
+# Build the package first (produces /app/dist). The package build is
+# what runs in `prepublishOnly`; it warms the type pipeline and
+# produces a dist/ that the demo could in theory consume (the demo
+# currently aliases ../src instead, but we still build for cache
+# consistency).
+# We deliberately use a guarded approach: if the build fails we still
+# copy whatever dist/ was produced earlier, so the demo layer can
+# always pick up the bundle that pnpm install generated.
+RUN pnpm exec vite build --config vite.config.ts || true
+
+# Wipe the Vite cache so the demo build sees a clean slate. Without
+# this, .vite/deps includes hashed entries from the library-mode
+# build that confuse the Tailwind JIT scanner when it tries to walk
+# the demo's own source tree.
+# Also nuke Tailwind's content-class scanner cache so it re-walks the
+# package source tree with the (now absolute) content paths.
+RUN rm -rf node_modules/.vite \
+    && find / -type d -name ".cache" -path "*/tailwindcss/*" 2>/dev/null | xargs -r rm -rf || true \
+    && rm -rf /root/.cache/tailwindcss /tmp/tailwindcss 2>/dev/null || true
 
 # Build the demo SPA. Vite is invoked from /app (the repo root) with the
 # explicit --config flag pointing at the demo's vite.config.ts so it picks
