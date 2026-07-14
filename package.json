@@ -91,6 +91,7 @@
     "test:unit": "vitest run --exclude 'tests/e2e/**'",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
+    "demo:og-assets": "node scripts/generate-demo-og-assets.mjs",
     "prepare": "vite build && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run typecheck && npm run test:unit && npm run build"
   },
