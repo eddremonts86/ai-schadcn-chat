@@ -1,0 +1,228 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e6] [cursor=pointer]:
+        - /url: "#top"
+      - generic [ref=e10]:
+        - link "View on npm" [ref=e11] [cursor=pointer]:
+          - /url: https://www.npmjs.com/package/ai-schadcn-chat
+        - link "View on GitHub" [ref=e12] [cursor=pointer]:
+          - /url: https://github.com/eddremonts86/ai-schadcn-chat
+        - button "Try it live" [ref=e13] [cursor=pointer]
+        - button "Open menu" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - heading "The AI chat panel shadcn/ui forgot to ship." [level=1] [ref=e19]
+        - paragraph [ref=e20]: A fully-featured, deeply configurable chat UI for React — works with Anthropic, OpenAI, or any OpenAI-compatible gateway (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama…).
+        - paragraph [ref=e21]: Anthropic · OpenAI · OpenRouter · MiniMax · Together · Groq · vLLM · Ollama
+        - generic [ref=e22]:
+          - button "pnpm add ai-schadcn-chat" [ref=e23] [cursor=pointer]
+          - generic [ref=e28]:
+            - button "Try it live" [ref=e29] [cursor=pointer]
+            - link "View on GitHub" [ref=e30] [cursor=pointer]:
+              - /url: https://github.com/eddremonts86/ai-schadcn-chat
+      - generic [ref=e31]:
+        - generic [ref=e32]: App.tsx
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]: tsx
+            - button "Copy code" [ref=e39] [cursor=pointer]: Copy
+          - code [ref=e41]:
+            - text: "import { ChatPanel, defaultConfig } from \"ai-schadcn-chat\"; import \"ai-schadcn-chat/styles.css\"; export function App() { const config = defaultConfig({ systemPrompt: \"You are a concise coding assistant.\", ui: { title: \"Coding buddy\" }, }); return"
+            - generic [ref=e42]: "<ChatPanel config={config} />"
+            - text: "; }"
+    - generic [ref=e45]:
+      - generic [ref=e46]:
+        - heading "Everything a chat UI needs. Nothing it doesn't." [level=2] [ref=e47]
+        - paragraph [ref=e48]: Six things ai-schadcn-chat gets right out of the box.
+      - generic [ref=e55]:
+        - heading "Three surfaces, one package" [level=3] [ref=e56]
+        - paragraph [ref=e57]: Drop in <ChatPanel /> for an instant UI, compose <ChatProvider /> + <MessageList /> + <ChatComposer /> for a custom layout, or use the framework-agnostic ChatEngine class without React at all.
+        - generic [ref=e58]:
+          - code [ref=e59]: <ChatPanel />
+          - code [ref=e60]: <ChatProvider /> + <MessageList /> + <ChatComposer />
+          - code [ref=e61]: ChatEngine
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "Any provider" [level=3] [ref=e67]
+          - paragraph [ref=e68]: Native adapters for Anthropic and OpenAI, plus a generic OpenAI-compatible mode for OpenRouter, MiniMax, Together, Groq, vLLM, Ollama…
+        - generic [ref=e69]:
+          - heading "Built on shadcn/ui + Radix" [level=3] [ref=e77]
+          - paragraph [ref=e78]: Looks and feels like the rest of the shadcn ecosystem. Your Tailwind theme carries over automatically.
+        - generic [ref=e79]:
+          - heading "Tools / function calling" [level=3] [ref=e83]
+          - paragraph [ref=e84]: Register named tools with JSON-Schema parameters and async handlers — the engine dispatches calls and feeds results back to the model.
+        - generic [ref=e85]:
+          - heading "Streaming, persistence, retries" [level=3] [ref=e89]
+          - paragraph [ref=e90]: Incremental SSE streaming, automatic retry with exponential back-off for 429/5xx, opt-in localStorage persistence keyed by persistKey.
+        - generic [ref=e91]:
+          - heading "Markdown, MDX, code highlighting" [level=3] [ref=e97]
+          - paragraph [ref=e98]: GFM tables, raw HTML, and syntax-highlighted code with one-click copy — all through react-markdown + remark-gfm + rehype-highlight + rehype-raw.
+    - generic [ref=e100]:
+      - generic [ref=e101]:
+        - heading "Try it live" [level=2] [ref=e102]
+        - paragraph [ref=e103]:
+          - text: The real
+          - code [ref=e104]: <ChatPanel />
+          - text: on the left. Mutate any of the 72 documented fields in the form on the right and watch the panel react in place.
+      - button "Show config" [ref=e106] [cursor=pointer]
+      - generic [ref=e109]:
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]: 💻
+            - generic [ref=e114]:
+              - paragraph [ref=e115]: Coding buddy
+              - paragraph [ref=e116]:
+                - generic [ref=e118]: MiniMax M3
+          - generic [ref=e119]:
+            - button "💻 Coding buddy" [ref=e120] [cursor=pointer]:
+              - generic [ref=e121]: 💻
+              - generic [ref=e122]: Coding buddy
+            - button "Docs 1" [ref=e123] [cursor=pointer]:
+              - generic [ref=e124]: Docs
+              - generic [ref=e125]: "1"
+            - button "New chat" [ref=e127] [cursor=pointer]
+            - button "Conversation history" [ref=e128] [cursor=pointer]
+            - button "Switch to dark mode" [ref=e129] [cursor=pointer]
+            - button "More" [ref=e130] [cursor=pointer]
+        - generic [ref=e131]:
+          - generic [ref=e133]:
+            - heading "Hey — what are we building?" [level=2] [ref=e138]
+            - paragraph [ref=e139]: Ask anything, or start with one of these. Powered by MiniMax M3.
+            - generic [ref=e140]:
+              - button "Explain async/await like I'm five" [ref=e141] [cursor=pointer]
+              - button "Review this React component for bugs" [ref=e144] [cursor=pointer]
+              - button "Write a SQL query with a CTE" [ref=e147] [cursor=pointer]
+              - button "Refactor this function to be pure" [ref=e150] [cursor=pointer]
+          - button
+        - generic [ref=e153]:
+          - generic [ref=e155]:
+            - button "Attach files" [ref=e156] [cursor=pointer]
+            - textbox "Ask anything, or paste some code…" [ref=e157]
+            - button "Select model" [ref=e158] [cursor=pointer]:
+              - generic [ref=e159]: MiniMax-M3
+            - button "Send message" [disabled]
+          - paragraph [ref=e160]: Press Enter to send · Shift+Enter for a new line
+    - region [ref=e161]:
+      - generic [ref=e162]:
+        - generic [ref=e163]:
+          - generic [ref=e164]: Configuration reference
+          - heading [level=2] [ref=e168]:
+            - text: Every knob on
+            - code [ref=e169]: <ChatPanel />
+          - paragraph [ref=e170]: 77 documented fields across six sections. Each card explains what the field does, what it defaults to, and shows real usage you can paste straight into your config.
+        - generic [ref=e171]:
+          - tablist [ref=e173]:
+            - tab "Provider 10" [selected] [ref=e174] [cursor=pointer]:
+              - text: Provider
+              - generic [ref=e175]: "10"
+            - tab "Model 8" [ref=e176] [cursor=pointer]:
+              - text: Model
+              - generic [ref=e177]: "8"
+            - tab "Behavior 7" [ref=e178] [cursor=pointer]:
+              - text: Behavior
+              - generic [ref=e179]: "7"
+            - tab "Resilience 6" [ref=e180] [cursor=pointer]:
+              - text: Resilience
+              - generic [ref=e181]: "6"
+            - tab "Personality & tools 6" [ref=e182] [cursor=pointer]:
+              - text: Personality & tools
+              - generic [ref=e183]: "6"
+            - tab "UI 40" [ref=e184] [cursor=pointer]:
+              - text: UI
+              - generic [ref=e185]: "40"
+          - tabpanel "Provider 10" [ref=e186]:
+            - generic [ref=e187]:
+              - heading "Provider" [level=3] [ref=e188]
+              - paragraph [ref=e189]: Where requests go — protocol, base URL, auth, and credentials.
+            - generic [ref=e190]:
+              - 'button "kind enum required default: \"openai-compatible\" Which provider protocol the engine speaks. Native Anthropic Messages API, native OpenAI Chat Completions, or the OpenAI-compatible dialect used by OpenRouter, MiniMax, Together, Groq, vLLM, Ollama''s /openai endpoint, etc." [ref=e192] [cursor=pointer]':
+                - generic [ref=e193]:
+                  - generic [ref=e194]:
+                    - code [ref=e195]: kind
+                    - generic [ref=e196]: enum
+                    - generic [ref=e197]: required
+                    - generic [ref=e198]: "default: \"openai-compatible\""
+                  - paragraph [ref=e199]: Which provider protocol the engine speaks. Native Anthropic Messages API, native OpenAI Chat Completions, or the OpenAI-compatible dialect used by OpenRouter, MiniMax, Together, Groq, vLLM, Ollama's /openai endpoint, etc.
+              - 'button "baseUrl string required default: \"https://api.MiniMax.chat/v1\" Root URL of the API. The package appends the chat-completions path itself, so do NOT include /v1/chat/completions here." [ref=e203] [cursor=pointer]':
+                - generic [ref=e204]:
+                  - generic [ref=e205]:
+                    - code [ref=e206]: baseUrl
+                    - generic [ref=e207]: string
+                    - generic [ref=e208]: required
+                    - generic [ref=e209]: "default: \"https://api.MiniMax.chat/v1\""
+                  - paragraph [ref=e210]: Root URL of the API. The package appends the chat-completions path itself, so do NOT include /v1/chat/completions here.
+              - 'button "authHeader enum default: \"bearer\" How the apiKey is sent on every request. Anthropic''s native API expects x-api-key, OpenAI and most gateways expect Authorization: Bearer." [ref=e214] [cursor=pointer]':
+                - generic [ref=e215]:
+                  - generic [ref=e216]:
+                    - code [ref=e217]: authHeader
+                    - generic [ref=e218]: enum
+                    - generic [ref=e219]: "default: \"bearer\""
+                  - paragraph [ref=e220]: "How the apiKey is sent on every request. Anthropic's native API expects x-api-key, OpenAI and most gateways expect Authorization: Bearer."
+              - 'button "credentials.apiKey string required default: \"\" (read from env by defaultConfig) Bearer / x-api-key token sent on every request. Treat it like a password — never commit it; load it from an env var or a server-side proxy." [ref=e224] [cursor=pointer]':
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - code [ref=e227]: credentials.apiKey
+                    - generic [ref=e228]: string
+                    - generic [ref=e229]: required
+                    - generic [ref=e230]: "default: \"\" (read from env by defaultConfig)"
+                  - paragraph [ref=e231]: Bearer / x-api-key token sent on every request. Treat it like a password — never commit it; load it from an env var or a server-side proxy.
+              - 'button "credentials.secondaryKey string default: undefined Optional secondary credential sent alongside the primary one. Some gateways accept x-api-key plus Authorization simultaneously." [ref=e235] [cursor=pointer]':
+                - generic [ref=e236]:
+                  - generic [ref=e237]:
+                    - code [ref=e238]: credentials.secondaryKey
+                    - generic [ref=e239]: string
+                    - generic [ref=e240]: "default: undefined"
+                  - paragraph [ref=e241]: Optional secondary credential sent alongside the primary one. Some gateways accept x-api-key plus Authorization simultaneously.
+              - 'button "credentials.secondaryKeyHeader string default: \"x-api-key\" Header name to use when sending secondaryKey. Defaults to x-api-key." [ref=e245] [cursor=pointer]':
+                - generic [ref=e246]:
+                  - generic [ref=e247]:
+                    - code [ref=e248]: credentials.secondaryKeyHeader
+                    - generic [ref=e249]: string
+                    - generic [ref=e250]: "default: \"x-api-key\""
+                  - paragraph [ref=e251]: Header name to use when sending secondaryKey. Defaults to x-api-key.
+              - 'button "organization string default: undefined OpenAI organization id, sent as OpenAI-Organization on every request. Ignored by non-OpenAI providers." [ref=e255] [cursor=pointer]':
+                - generic [ref=e256]:
+                  - generic [ref=e257]:
+                    - code [ref=e258]: organization
+                    - generic [ref=e259]: string
+                    - generic [ref=e260]: "default: undefined"
+                  - paragraph [ref=e261]: OpenAI organization id, sent as OpenAI-Organization on every request. Ignored by non-OpenAI providers.
+              - 'button "project string default: undefined OpenAI project id, sent as OpenAI-Project. Ignored by non-OpenAI providers." [ref=e265] [cursor=pointer]':
+                - generic [ref=e266]:
+                  - generic [ref=e267]:
+                    - code [ref=e268]: project
+                    - generic [ref=e269]: string
+                    - generic [ref=e270]: "default: undefined"
+                  - paragraph [ref=e271]: OpenAI project id, sent as OpenAI-Project. Ignored by non-OpenAI providers.
+              - 'button "defaultHeaders object default: {} Extra headers merged into every request. Useful for x-title, x-source, gateway identification, etc." [ref=e275] [cursor=pointer]':
+                - generic [ref=e276]:
+                  - generic [ref=e277]:
+                    - code [ref=e278]: defaultHeaders
+                    - generic [ref=e279]: object
+                    - generic [ref=e280]: "default: {}"
+                  - paragraph [ref=e281]: Extra headers merged into every request. Useful for x-title, x-source, gateway identification, etc.
+              - 'button "chatPath string default: \"/chat/completions\" Path appended to baseUrl for chat-completions requests. Override when proxying or hitting a non-standard gateway." [ref=e285] [cursor=pointer]':
+                - generic [ref=e286]:
+                  - generic [ref=e287]:
+                    - code [ref=e288]: chatPath
+                    - generic [ref=e289]: string
+                    - generic [ref=e290]: "default: \"/chat/completions\""
+                  - paragraph [ref=e291]: Path appended to baseUrl for chat-completions requests. Override when proxying or hitting a non-standard gateway.
+        - generic [ref=e294]:
+          - text: Missing a field? Open an issue on
+          - link "GitHub" [ref=e295] [cursor=pointer]:
+            - /url: https://github.com/eddremonts86/ai-schadcn-chat
+          - text: — this page is generated from
+          - code [ref=e296]: src/types/chat.ts
+          - text: so it stays in sync with the public API.
+  - contentinfo [ref=e297]:
+    - generic [ref=e298]:
+      - paragraph [ref=e299]: MIT License · ai-schadcn-chat
+      - generic [ref=e300]:
+        - link "npm" [ref=e301] [cursor=pointer]:
+          - /url: https://www.npmjs.com/package/ai-schadcn-chat
+        - link "GitHub" [ref=e306] [cursor=pointer]:
+          - /url: https://github.com/eddremonts86/ai-schadcn-chat
+  - button "Ask about this library" [ref=e310] [cursor=pointer]

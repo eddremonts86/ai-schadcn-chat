@@ -1,37 +1,30 @@
-// Paths are resolved against the demo's Vite project root, not the
-// process cwd. Inside `pnpm exec vite build --config demo/vite.config.ts`
-// the Vite project root is /app/demo/, so `./src/**` resolves to
-// /app/demo/src/, but `src/**` (no leading dot) would resolve to the
-// package source at /app/src because that's where the process happens
-// to be. We expand the package source path with an absolute, glob-
-// safe entry so Tailwind v3's micromatch-based content scanner finds
-// the package source regardless of cwd.
+// Tailwind resolves relative `content` globs against `process.cwd()`,
+// NOT against this config file's directory. That cwd differs across
+// the ways this config gets loaded: `pnpm demo` from the repo root
+// (cwd = repo root), `vite build --config demo/vite.config.ts` from
+// inside the Docker build (cwd may be /app or /app/demo), etc. Plain
+// relative strings like "./src/**" or "../src/**" are therefore
+// ambiguous and can silently resolve to the wrong directory (or one
+// outside the repo entirely), which drops every class used only in
+// demo/src from the generated CSS. `__dirname` inside a CommonJS
+// config loaded via require() is always this file's own directory
+// (demo/), regardless of cwd, so anchor every glob to it explicitly.
 const path = require("node:path");
-const pkgRoot = path.resolve(__dirname, "..");
 
 const config = {
   darkMode: ["class"],
   content: [
-    // Files inside the demo itself.
-    "./index.html",
-    "./src/**/*.{ts,tsx}",
-    // The package source that the demo imports via aliases. Without
-    // this entry, every utility class used in <ChatPanel />,
-    // <ChatHeader />, <Markdown />, etc. is dropped from the build
-    // and the entire layout collapses to naked HTML. We list each
-    // sub-tree the package source lives under, explicitly, instead of
-    // one giant glob — Tailwind's default scanner does not follow
-    // symlinks and may not always resolve parent-relative globs in
-    // every build path (especially under Docker where `..` was
-    // ambiguous in the prior iteration).
-    `${pkgRoot}/src/components/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/hooks/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/lib/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/providers/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/types/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/utils/**/*.{ts,tsx}`,
-    `${pkgRoot}/src/index.ts`,
-    `${pkgRoot}/src/index.tsx`,
+    path.join(__dirname, "index.html"),
+    path.join(__dirname, "src/**/*.{ts,tsx}"),
+    // Package source sub-trees, anchored the same way.
+    path.join(__dirname, "../src/components/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/hooks/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/lib/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/providers/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/types/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/utils/**/*.{ts,tsx}"),
+    path.join(__dirname, "../src/index.ts"),
+    path.join(__dirname, "../src/index.tsx"),
   ],
   theme: {
     container: {
