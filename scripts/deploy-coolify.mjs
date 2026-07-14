@@ -151,6 +151,14 @@ async function ensureApp() {
     process.exit(1);
   }
   log(`creating application "${APP_NAME}" on ${DOMAIN}`);
+  // Field names verified against the live Coolify v4.0.0 API schema
+  // (app/Http/Controllers/Api/ApplicationsController.php on this instance):
+  // "dockerfile_path" and bare "fqdn" are NOT accepted fields — the real
+  // fields are "dockerfile_location" (path within the repo) and "domains"
+  // (a full "https://..." URL, not a bare hostname). "environment_name" is
+  // also required (or environment_uuid) and isn't optional despite not
+  // being flagged by earlier validation errors (extra-field checks short
+  // circuit before the environment presence check runs).
   const created = await api(
     "POST",
     `/api/v1/applications/public?project_uuid=${PROJECT}&server_uuid=${SERVER}`,
@@ -158,13 +166,14 @@ async function ensureApp() {
       type: "dockerfile",
       name: APP_NAME,
       description: "Static SPA demo for the ai-schadcn-chat npm package",
-      git_repository: "github.com:eddremonts86/ai-schadcn-chat.git",
+      environment_name: "production",
+      git_repository: "https://github.com/eddremonts86/ai-schadcn-chat.git",
       git_branch: "main",
-      dockerfile_path: "/Dockerfile",
+      build_pack: "dockerfile",
+      dockerfile_location: "/Dockerfile",
       ports_exposes: "80",
       destination_uuid: SERVER,
-      build_pack: "dockerfile",
-      fqdn: DOMAIN,
+      domains: `https://${DOMAIN}`,
     },
   );
   return created;
@@ -172,7 +181,10 @@ async function ensureApp() {
 
 async function triggerDeploy(appUuid) {
   log(`triggering deploy for ${appUuid}`);
-  await api("POST", `/api/v1/applications/${appUuid}/deploy`);
+  // The generic "/applications/{uuid}/deploy" path does not exist on this
+  // Coolify v4.0.0 instance (404) — the real endpoint is "start" (GET or
+  // POST both accepted per the live ApplicationsController source).
+  await api("POST", `/api/v1/applications/${appUuid}/start`);
   log("deploy request accepted; polling for a running state");
   for (let i = 0; i < 30; i++) {
     const status = await api("GET", `/api/v1/applications/${appUuid}`);
