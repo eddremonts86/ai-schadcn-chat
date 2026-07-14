@@ -120,9 +120,17 @@ async function api(method, path, body) {
 }
 
 async function findAppByName(name) {
-  const list = await api("GET", `/api/v1/projects/${PROJECT}/applications`);
-  const apps = list || [];
-  return apps.find((a) => a.name === name || a.fqdn?.includes(DOMAIN));
+  // Coolify v4 returns applications flat under /api/v1/applications
+  // (each carries its project_uuid). When the caller supplies
+  // COOLIFY_PROJECT_UUID we filter to that project so we never pick up
+  // an app from a different project by name coincidence.
+  const list = (await api("GET", `/api/v1/applications`)) || [];
+  if (!Array.isArray(list)) return null;
+  return list.find(
+    (a) =>
+      (a.name === name || a.fqdn?.includes(DOMAIN)) &&
+      (PROJECT ? a.project_uuid === PROJECT : true),
+  );
 }
 
 async function ensureApp() {
