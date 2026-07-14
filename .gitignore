@@ -37,3 +37,5 @@ coverage
 # misc
 .turbo
 node
+# Playwright MCP debugging artifacts (screenshots/snapshots), never product code
+.playwright-mcp/
