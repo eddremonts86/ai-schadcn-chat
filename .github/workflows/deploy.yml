@@ -1,0 +1,55 @@
+name: Deploy demo to Coolify
+
+# Triggers a Coolify deployment on every push to main (and on manual dispatch).
+# Coolify pulls the repo and rebuilds the demo container. This gives push-to-
+# deploy without relying on Coolify's dashboard "Automatic Deployment" toggle.
+#
+# Required repository secrets:
+#   COOLIFY_API_URL    e.g. http://178.105.106.79:8000
+#   COOLIFY_API_TOKEN  Coolify API bearer token
+#   COOLIFY_APP_UUID   the ai-chat application UUID
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coolify-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment
+        id: trigger
+        run: |
+          resp=$(curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+            -H "Accept: application/json" \
+            "${{ secrets.COOLIFY_API_URL }}/api/v1/applications/${{ secrets.COOLIFY_APP_UUID }}/start")
+          echo "$resp"
+          uuid=$(printf '%s' "$resp" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(JSON.parse(d).deployment_uuid||"")}catch{process.stdout.write("")}})')
+          echo "deployment_uuid=$uuid" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment to finish
+        if: steps.trigger.outputs.deployment_uuid != ''
+        run: |
+          uuid="${{ steps.trigger.outputs.deployment_uuid }}"
+          for i in $(seq 1 40); do
+            sleep 10
+            status=$(curl -fsS \
+              -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+              "${{ secrets.COOLIFY_API_URL }}/api/v1/deployments/$uuid" \
+              | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(JSON.parse(d).status||"?")}catch{process.stdout.write("?")}})')
+            echo "poll $i: $status"
+            case "$status" in
+              finished|success) echo "Deployment succeeded."; exit 0 ;;
+              failed|error|cancelled) echo "::error::Deployment $status"; exit 1 ;;
+            esac
+          done
+          echo "::error::Deployment did not finish within timeout"; exit 1
