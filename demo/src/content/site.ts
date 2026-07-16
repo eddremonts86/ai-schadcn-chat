@@ -5,8 +5,8 @@
  * framework-agnostic content, not markup.
  */
 export const REPO_URL = "https://github.com/eddremonts86/ai-schadcn-chat";
-export const NPM_URL = "https://www.npmjs.com/package/ai-schadcn-chat";
-export const INSTALL_COMMAND = "pnpm add ai-schadcn-chat";
+export const NPM_URL = "https://www.npmjs.com/package/@edd_remonts/ai-schadcn-chat";
+export const INSTALL_COMMAND = "pnpm add @edd_remonts/ai-schadcn-chat";
 
 export interface NavLink {
   label: string;
@@ -97,7 +97,7 @@ export const FEATURES: FeatureItem[] = [
 /** Condensed reference injected into the support widget's always-on document. */
 export const SUPPORT_WIDGET_DOC = `# ai-schadcn-chat quick reference
 
-- Install: \`pnpm add ai-schadcn-chat\` (peer deps: react ^18.3 || ^19, react-dom same).
+- Install: \`pnpm add @edd_remonts/ai-schadcn-chat\` (peer deps: react ^18.3 || ^19, react-dom same).
 - Three surfaces: <ChatPanel /> (all-in-one), <ChatProvider />+<MessageList />+<ChatComposer /> (compose your own layout), or the framework-agnostic ChatEngine class.
 - Providers: set config.provider.kind to "anthropic", "openai", or "openai-compatible" (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama's /openai endpoint, …).
 - Tools: pass config.tools with { name, description, parameters, handler } — the engine calls your handler and feeds the result back to the model.
