@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "ai-schadcn-chat/components";
+} from "@edd_remonts/ai-schadcn-chat/components";
 import { NAV_LINKS, NPM_URL, REPO_URL } from "../content/site";
 import { useScrollToId } from "../hooks/useScrollToId";
 

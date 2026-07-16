@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactElement } from "react";
-import { chromeAiAvailability, type ChromeAvailability } from "ai-schadcn-chat";
+import { chromeAiAvailability, type ChromeAvailability } from "@edd_remonts/ai-schadcn-chat";
 
 /**
  * Shown only in the key-less public demo. Chrome's on-device model works just

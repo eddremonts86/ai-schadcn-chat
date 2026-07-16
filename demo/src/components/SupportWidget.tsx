@@ -1,8 +1,8 @@
 import { MessageCircle, X } from "lucide-react";
-import { ChatPanel } from "ai-schadcn-chat";
-import type { ChatConfig } from "ai-schadcn-chat";
-import { Button } from "ai-schadcn-chat/components";
-import { cn } from "ai-schadcn-chat/lib";
+import { ChatPanel } from "@edd_remonts/ai-schadcn-chat";
+import type { ChatConfig } from "@edd_remonts/ai-schadcn-chat";
+import { Button } from "@edd_remonts/ai-schadcn-chat/components";
+import { cn } from "@edd_remonts/ai-schadcn-chat/lib";
 import { useChatWidget } from "../hooks/useChatWidget";
 
 /**

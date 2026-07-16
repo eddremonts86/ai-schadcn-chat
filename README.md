@@ -2,7 +2,7 @@
 
 > A fully-featured, deeply configurable AI chat panel for React 18/19 — works with any Anthropic / OpenAI / OpenAI-compatible API (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama, …).
 
-[![npm version](https://img.shields.io/npm/v/ai-schadcn-chat.svg)](https://www.npmjs.com/package/ai-schadcn-chat)
+[![npm version](https://img.shields.io/npm/v/@edd_remonts/ai-schadcn-chat.svg)](https://www.npmjs.com/package/@edd_remonts/ai-schadcn-chat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 
@@ -19,7 +19,7 @@ pnpm exec vite --config demo/vite.config.ts build
 
 The published `dist/` and `demo/dist/` are independent artifacts — the
 package and the demo do not need each other at install time. The demo
-imports `ai-schadcn-chat` from npm (see `demo/package.json`) so the
+imports `@edd_remonts/ai-schadcn-chat` from npm (see `demo/package.json`) so the
 deployed demo bundle does not require the package source on the
 server.
 
@@ -49,7 +49,7 @@ The demo ships as a static SPA. Two paths to get it to a host:
 ## Install
 
 ```bash
-pnpm add ai-schadcn-chat
+pnpm add @edd_remonts/ai-schadcn-chat
 ```
 
 Peer deps: `react` ^18.3.0 || ^19.0.0, `react-dom` ^18.3.0 || ^19.0.0.
@@ -62,9 +62,9 @@ pnpm add react react-dom
 ## Quick start
 
 ```tsx
-import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
+import { ChatPanel, defaultConfig } from "@edd_remonts/ai-schadcn-chat";
 // Import the bundled stylesheet once in your app root.
-import "ai-schadcn-chat/styles.css";
+import "@edd_remonts/ai-schadcn-chat/styles.css";
 
 export function App() {
   // defaultConfig() reads VITE_MINIMAX_API_KEY (or MINIMAX_API_KEY) from
@@ -103,7 +103,7 @@ In Next.js / non-Vite environments, drop the `VITE_` prefix (or expose them thro
 Swap the `provider.kind` and supply your own API key:
 
 ```tsx
-import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
+import { ChatPanel, defaultConfig } from "@edd_remonts/ai-schadcn-chat";
 
 // OpenAI
 const openai = defaultConfig({
@@ -141,7 +141,7 @@ Any OpenAI-compatible gateway (OpenRouter, Together, Groq, vLLM, Ollama `/openai
 The full `ChatConfig` shape:
 
 ```ts
-import type { ChatConfig } from "ai-schadcn-chat";
+import type { ChatConfig } from "@edd_remonts/ai-schadcn-chat";
 
 const config: ChatConfig = {
   provider: { /* see "Connect to …" above */ },
@@ -213,7 +213,7 @@ Every key is optional; sensible defaults ship.
 Register named tools with a JSON-Schema for `parameters` and an async `handler`. The engine dispatches tool calls made by the model and feeds the result back as a `tool` message.
 
 ```tsx
-import { defaultConfig } from "ai-schadcn-chat";
+import { defaultConfig } from "@edd_remonts/ai-schadcn-chat";
 
 const config = defaultConfig({
   tools: [
@@ -273,7 +273,7 @@ For a fully bespoke message renderer, use `renderMessage` (per `UiConfig`):
 To compose your own layout without `ChatPanel`:
 
 ```tsx
-import { ChatProvider, ChatHeader, MessageList, ChatComposer, useChat } from "ai-schadcn-chat";
+import { ChatProvider, ChatHeader, MessageList, ChatComposer, useChat } from "@edd_remonts/ai-schadcn-chat";
 
 <ChatProvider config={config}>
   <MyCustomHeader />

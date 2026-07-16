@@ -21,12 +21,12 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
-      "ai-schadcn-chat": ["./src/index.ts"],
-      "ai-schadcn-chat/hooks": ["./src/hooks/index.ts"],
-      "ai-schadcn-chat/providers": ["./src/providers/index.ts"],
-      "ai-schadcn-chat/lib": ["./src/lib/index.ts"],
-      "ai-schadcn-chat/types": ["./src/types/index.ts"],
-      "ai-schadcn-chat/components": ["./src/components/index.ts"]
+      "@edd_remonts/ai-schadcn-chat": ["./src/index.ts"],
+      "@edd_remonts/ai-schadcn-chat/hooks": ["./src/hooks/index.ts"],
+      "@edd_remonts/ai-schadcn-chat/providers": ["./src/providers/index.ts"],
+      "@edd_remonts/ai-schadcn-chat/lib": ["./src/lib/index.ts"],
+      "@edd_remonts/ai-schadcn-chat/types": ["./src/types/index.ts"],
+      "@edd_remonts/ai-schadcn-chat/components": ["./src/components/index.ts"]
     }
   },
   "include": ["src", "demo", "scripts"],

@@ -21,18 +21,18 @@ export default defineConfig({
   resolve: {
     // Order matters: Vite matches aliases by prefix ("foo" also matches
     // "foo/bar"), walking this object in declaration order and stopping at
-    // the first hit. The bare "ai-schadcn-chat" entry must come LAST, or it
-    // swallows every "ai-schadcn-chat/<subpath>" import before the specific
+    // the first hit. The bare "@edd_remonts/ai-schadcn-chat" entry must come LAST, or it
+    // swallows every "@edd_remonts/ai-schadcn-chat/<subpath>" import before the specific
     // entries below ever get a chance to match.
     alias: {
-      "ai-schadcn-chat/typeset.css": resolve(pkgRoot, "src/styles/typeset.css"),
-      "ai-schadcn-chat/typeset-presets.css": resolve(pkgRoot, "src/styles/typeset-presets.css"),
-      "ai-schadcn-chat/hooks": resolve(pkgRoot, "src/hooks/index.ts"),
-      "ai-schadcn-chat/providers": resolve(pkgRoot, "src/providers/index.ts"),
-      "ai-schadcn-chat/lib": resolve(pkgRoot, "src/lib/index.ts"),
-      "ai-schadcn-chat/types": resolve(pkgRoot, "src/types/index.ts"),
-      "ai-schadcn-chat/components": resolve(pkgRoot, "src/components/index.ts"),
-      "ai-schadcn-chat": resolve(pkgRoot, "src/index.ts"),
+      "@edd_remonts/ai-schadcn-chat/typeset.css": resolve(pkgRoot, "src/styles/typeset.css"),
+      "@edd_remonts/ai-schadcn-chat/typeset-presets.css": resolve(pkgRoot, "src/styles/typeset-presets.css"),
+      "@edd_remonts/ai-schadcn-chat/hooks": resolve(pkgRoot, "src/hooks/index.ts"),
+      "@edd_remonts/ai-schadcn-chat/providers": resolve(pkgRoot, "src/providers/index.ts"),
+      "@edd_remonts/ai-schadcn-chat/lib": resolve(pkgRoot, "src/lib/index.ts"),
+      "@edd_remonts/ai-schadcn-chat/types": resolve(pkgRoot, "src/types/index.ts"),
+      "@edd_remonts/ai-schadcn-chat/components": resolve(pkgRoot, "src/components/index.ts"),
+      "@edd_remonts/ai-schadcn-chat": resolve(pkgRoot, "src/index.ts"),
       "@": resolve(pkgRoot, "src"),
     },
   },

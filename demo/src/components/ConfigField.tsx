@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from "react";
 import { Check, ChevronDown, Copy } from "lucide-react";
-import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from "ai-schadcn-chat/components";
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@edd_remonts/ai-schadcn-chat/components";
 import type { ConfigField as ConfigFieldEntry } from "../content/config-reference";
 
 /**

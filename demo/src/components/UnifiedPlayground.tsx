@@ -12,14 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
   Switch,
-} from "ai-schadcn-chat/components";
+} from "@edd_remonts/ai-schadcn-chat/components";
 import {
   ChatProvider,
   ChatPanel,
   TYPESET_PRESETS,
   useChat,
   type ChatConfig,
-} from "ai-schadcn-chat";
+} from "@edd_remonts/ai-schadcn-chat";
 import { buildCodingBuddyConfig } from "../lib/chat-configs";
 import { CONFIG_FIELDS, type ConfigField as CatalogField, type ConfigSectionId } from "../content/config-reference";
 import { labelFor } from "../content/form-labels";

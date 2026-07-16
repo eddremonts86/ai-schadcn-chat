@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from "react";
 import { ScrollText } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ai-schadcn-chat/components";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@edd_remonts/ai-schadcn-chat/components";
 import {
   CONFIG_FIELDS,
   CONFIG_SECTIONS,

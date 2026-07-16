@@ -30,8 +30,8 @@ export const HERO_CONTENT = {
  * same syntax-highlighting pipeline the chat messages use, so the marketing
  * page and the product share one code-rendering path. */
 export const QUICK_START_SNIPPET = `\`\`\`tsx
-import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
-import "ai-schadcn-chat/styles.css";
+import { ChatPanel, defaultConfig } from "@edd_remonts/ai-schadcn-chat";
+import "@edd_remonts/ai-schadcn-chat/styles.css";
 
 export function App() {
   const config = defaultConfig({

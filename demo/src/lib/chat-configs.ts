@@ -1,5 +1,5 @@
-import { buildDefaultChromeConfig, defaultConfig } from "ai-schadcn-chat";
-import type { ChatConfig, ModelDescriptor } from "ai-schadcn-chat";
+import { buildDefaultChromeConfig, defaultConfig } from "@edd_remonts/ai-schadcn-chat";
+import type { ChatConfig, ModelDescriptor } from "@edd_remonts/ai-schadcn-chat";
 import { bridgeViteEnv, minimaxApiKey, minimaxBaseUrl, minimaxModel } from "./env";
 import { SUPPORT_WIDGET_DOC } from "../content/site";
 
