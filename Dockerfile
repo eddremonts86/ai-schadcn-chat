@@ -126,11 +126,16 @@ server {
         try_files $uri =404;
     }
 
-    location = /index.html {
-        add_header Cache-Control "no-cache, must-revalidate" always;
-    }
-
     location / {
+        # The SPA shell is served here (both direct /index.html hits and the
+        # try_files fallback for client-side routes), so no-cache must live in
+        # THIS block — a `location = /index.html` rule never fires for `/`.
+        # add_header in a location replaces inherited server-level headers, so
+        # the security headers are repeated here on purpose.
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Cache-Control "no-cache, must-revalidate" always;
         try_files $uri $uri/ /index.html;
     }
 
