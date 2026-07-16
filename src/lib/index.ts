@@ -11,4 +11,5 @@ export {
   resolveModelPreset,
   resolvePersonalityPreset,
   buildDefaultMiniMaxConfig,
+  buildDefaultChromeConfig,
 } from "../types/presets.js";

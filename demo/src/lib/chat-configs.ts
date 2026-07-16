@@ -1,4 +1,4 @@
-import { defaultConfig } from "ai-schadcn-chat";
+import { buildDefaultChromeConfig, defaultConfig } from "ai-schadcn-chat";
 import type { ChatConfig, ModelDescriptor } from "ai-schadcn-chat";
 import { bridgeViteEnv, minimaxApiKey, minimaxBaseUrl, minimaxModel } from "./env";
 import { SUPPORT_WIDGET_DOC } from "../content/site";
@@ -6,15 +6,23 @@ import { SUPPORT_WIDGET_DOC } from "../content/site";
 // Run once at module load, before any config builder below reads env vars.
 bridgeViteEnv();
 
+/** True when this build has no MiniMax key, so the demo runs key-less. */
+export function usingChromeFallback(): boolean {
+  return !minimaxApiKey();
+}
+
 /**
- * Every persona in this demo talks to the same MiniMax deployment; only the
- * system prompt / personality / persisted conversation differ. Centralizing
- * the provider wiring here means adding a new persona is a ~15-line
- * function, not a copy-pasted useEffect block in App.tsx.
+ * Point a persona config at a live provider. With a MiniMax key it uses the
+ * shared MiniMax deployment; without one (e.g. the public demo) it falls back
+ * to Chrome's built-in on-device model so the chat works with no credentials.
+ * Only the provider/model swap — the persona's prompt, UI, and documents stay.
  */
-function withMiniMaxCredentials(config: ChatConfig): ChatConfig {
+function withProvider(config: ChatConfig): ChatConfig {
   const apiKey = minimaxApiKey();
-  if (!apiKey) return config;
+  if (!apiKey) {
+    const chrome = buildDefaultChromeConfig();
+    return { ...config, provider: chrome.provider, model: chrome.model };
+  }
   return {
     ...config,
     provider: {
@@ -94,7 +102,7 @@ export function buildCodingBuddyConfig(): ChatConfig {
     ],
     persistKey: "ai-schadcn-chat-demo:coding-buddy",
   });
-  return withMiniMaxCredentials(config);
+  return withProvider(config);
 }
 
 /** The "Docs guide" persona behind the floating support widget. */
@@ -132,5 +140,5 @@ export function buildSupportWidgetConfig(): ChatConfig {
     ],
     persistKey: "ai-schadcn-chat-demo:support-widget",
   });
-  return withMiniMaxCredentials(config);
+  return withProvider(config);
 }

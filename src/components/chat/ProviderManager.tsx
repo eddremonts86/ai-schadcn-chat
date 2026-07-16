@@ -48,6 +48,7 @@ const KINDS: { value: ProviderKind; label: string }[] = [
   { value: "anthropic", label: "Anthropic (native)" },
   { value: "openai", label: "OpenAI (native)" },
   { value: "openai-compatible", label: "OpenAI-compatible" },
+  { value: "chrome-builtin", label: "Chrome on-device (Gemini Nano)" },
 ];
 
 export interface ProviderManagerProps {
@@ -110,7 +111,9 @@ export function ProviderManager({
     }
   }, [open, startInCreate]);
 
-  const canSave = draft.name.trim().length > 0 && draft.baseUrl.trim().length > 0;
+  const canSave =
+    draft.name.trim().length > 0 &&
+    (draft.kind === "chrome-builtin" || draft.baseUrl.trim().length > 0);
 
   const onSave = () => {
     if (!canSave) return;
@@ -298,13 +301,22 @@ function EditView({
           </Select>
         </Field>
 
-        <Field label="Base URL">
-          <Input value={draft.baseUrl} onChange={(e) => set("baseUrl", e.target.value)} placeholder="https://api.example.com/v1" className="font-mono text-xs" />
-        </Field>
+        {draft.kind === "chrome-builtin" ? (
+          <p className="rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+            Runs on-device via Chrome's built-in model — no URL or key needed. Requires Chrome 138+
+            on supported hardware with the Prompt API enabled.
+          </p>
+        ) : (
+          <>
+            <Field label="Base URL">
+              <Input value={draft.baseUrl} onChange={(e) => set("baseUrl", e.target.value)} placeholder="https://api.example.com/v1" className="font-mono text-xs" />
+            </Field>
 
-        <Field label="API key" hint="stored in your browser">
-          <Input type="password" value={draft.apiKey} onChange={(e) => set("apiKey", e.target.value)} placeholder="sk-…" className="font-mono text-xs" autoComplete="off" />
-        </Field>
+            <Field label="API key" hint="stored in your browser">
+              <Input type="password" value={draft.apiKey} onChange={(e) => set("apiKey", e.target.value)} placeholder="sk-…" className="font-mono text-xs" autoComplete="off" />
+            </Field>
+          </>
+        )}
 
         <Field label="Models" hint="one per line · id | Label">
           <Textarea

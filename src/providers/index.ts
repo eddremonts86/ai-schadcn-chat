@@ -1,5 +1,6 @@
 import type { ChatConfig, ProviderAdapter, ProviderKind } from "../types/chat.js";
 import { AnthropicProvider } from "./anthropic.js";
+import { ChromeAIProvider } from "./chrome.js";
 import { OpenAIProvider } from "./openai.js";
 
 /**
@@ -18,11 +19,15 @@ export function createProvider(cfg: ChatConfig): ProviderAdapter {
       return new OpenAIProvider("openai");
     case "openai-compatible":
       return new OpenAIProvider("openai-compatible");
+    case "chrome-builtin":
+      return new ChromeAIProvider();
     default:
       throw new Error(`Unsupported provider kind: ${kind satisfies never as ProviderKind}`);
   }
 }
 
-export { AnthropicProvider, OpenAIProvider };
+export { AnthropicProvider, OpenAIProvider, ChromeAIProvider };
+export { chromeAiAvailability } from "./chrome.js";
+export type { ChromeAvailability } from "./chrome.js";
 export type { ProviderAdapter };
 export * from "./base.js";
