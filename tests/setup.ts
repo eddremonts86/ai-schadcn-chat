@@ -9,6 +9,29 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
+// Node 22+ ships an experimental global `localStorage` that is unusable
+// without --localstorage-file, and under it jsdom's window.localStorage comes
+// through as undefined — so any browser code that persists state (conversation
+// history, provider profiles) throws in tests. Provide a real in-memory
+// Storage so those paths work regardless of the Node version running the suite.
+if (typeof window !== "undefined" && !window.localStorage) {
+  const store = new Map<string, string>();
+  const memoryStorage = {
+    get length() {
+      return store.size;
+    },
+    clear: () => store.clear(),
+    getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+    key: (i: number) => Array.from(store.keys())[i] ?? null,
+    removeItem: (k: string) => void store.delete(k),
+    setItem: (k: string, v: string) => void store.set(k, String(v)),
+  } as unknown as Storage;
+  Object.defineProperty(window, "localStorage", {
+    value: memoryStorage,
+    configurable: true,
+  });
+}
+
 // jsdom doesn't ship matchMedia.
 if (typeof window !== "undefined" && !window.matchMedia) {
   window.matchMedia = ((query: string) => ({
