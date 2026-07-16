@@ -17,7 +17,12 @@ import {
  */
 export function useMiniMaxProviderSync(apiKey: string, baseUrl?: string): void {
   useEffect(() => {
-    if (!apiKey) return;
+    if (!apiKey) {
+      // No hosted key (public demo): make Chrome's on-device model the active
+      // provider so the manager UI matches the key-less fallback config.
+      setActiveProviderId("seed:chrome");
+      return;
+    }
     const minimax = listProviders().find((p) => p.id === "seed:minimax");
     if (minimax && !minimax.apiKey) {
       saveProvider({

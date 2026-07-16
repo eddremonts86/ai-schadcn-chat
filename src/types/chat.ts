@@ -10,7 +10,9 @@ export type ProviderKind =
   /** Native OpenAI Chat Completions API (https://platform.openai.com) */
   | "openai"
   /** Anything that speaks the OpenAI Chat Completions protocol (OpenRouter, MiniMax, Together, Groq, vLLM, Ollama /openai, etc.) */
-  | "openai-compatible";
+  | "openai-compatible"
+  /** Chrome built-in on-device model (Prompt API / Gemini Nano). No network, no API key — runs locally in Chrome 138+. */
+  | "chrome-builtin";
 
 export interface ApiCredentials {
   /** Bearer token sent in the Authorization header. For MiniMax use the dedicated MINIMAX_API_KEY. */

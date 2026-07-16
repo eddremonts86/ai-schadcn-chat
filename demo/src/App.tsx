@@ -1,7 +1,8 @@
 import { useMemo, type ReactElement } from "react";
 import { minimaxApiKey, minimaxBaseUrl } from "./lib/env";
-import { buildSupportWidgetConfig } from "./lib/chat-configs";
+import { buildSupportWidgetConfig, usingChromeFallback } from "./lib/chat-configs";
 import { useMiniMaxProviderSync } from "./hooks/useMiniMaxProviderSync";
+import { ChromeFallbackNotice } from "./components/ChromeFallbackNotice";
 import { SiteNav } from "./components/SiteNav";
 import { Hero } from "./components/Hero";
 import { FeatureGrid } from "./components/FeatureGrid";
@@ -35,6 +36,7 @@ export default function App(): ReactElement {
 
   return (
     <div className="app-mesh min-h-[100dvh] w-full text-foreground">
+      {usingChromeFallback() && <ChromeFallbackNotice />}
       <SiteNav />
       <main>
         <Hero />

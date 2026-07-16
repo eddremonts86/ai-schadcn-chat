@@ -90,6 +90,15 @@ export const defaultModelPresets: Record<string, ModelDescriptor> = {
     maxOutput: 8_192,
     provider: "openai-compatible",
   },
+  "chrome:gemini-nano": {
+    id: "gemini-nano",
+    label: "Chrome (on-device)",
+    contextWindow: 6_144,
+    vision: false,
+    tools: false,
+    maxOutput: 1_024,
+    provider: "chrome-builtin",
+  },
 };
 
 /**
@@ -213,6 +222,40 @@ export function buildDefaultMiniMaxConfig(overrides: Partial<ChatConfig> = {}): 
         "text/csv",
         "application/json",
       ],
+    },
+    ...overrides,
+  };
+  return config;
+}
+
+/**
+ * Key-less ChatConfig that runs on Chrome's built-in on-device model
+ * (Prompt API / Gemini Nano). Used as the automatic fallback when no hosted
+ * provider key is configured, so a public demo works with no credentials.
+ * Only functional in Chrome 138+ on supported hardware.
+ */
+export function buildDefaultChromeConfig(overrides: Partial<ChatConfig> = {}): ChatConfig {
+  const base = buildDefaultMiniMaxConfig();
+  const config: ChatConfig = {
+    ...base,
+    provider: {
+      kind: "chrome-builtin",
+      baseUrl: "",
+      credentials: { apiKey: "" },
+    },
+    model: {
+      id: "gemini-nano",
+      label: "Chrome (on-device)",
+      contextWindow: 6_144,
+      vision: false,
+      tools: false,
+      maxOutput: 1_024,
+      provider: "chrome-builtin",
+    },
+    persistKey: "ai-schadcn-chat:chrome",
+    ui: {
+      ...base.ui,
+      enableFileUpload: false,
     },
     ...overrides,
   };

@@ -98,11 +98,11 @@ export const CONFIG_FIELDS: Record<ConfigSectionId, ConfigField[]> = {
       path: "provider.kind",
       name: "kind",
       type: "enum",
-      enumValues: ["anthropic", "openai", "openai-compatible"],
+      enumValues: ["anthropic", "openai", "openai-compatible", "chrome-builtin"],
       defaultValue: '"openai-compatible"',
       required: true,
       description:
-        "Which provider protocol the engine speaks. Native Anthropic Messages API, native OpenAI Chat Completions, or the OpenAI-compatible dialect used by OpenRouter, MiniMax, Together, Groq, vLLM, Ollama's /openai endpoint, etc.",
+        "Which provider protocol the engine speaks. Native Anthropic Messages API, native OpenAI Chat Completions, the OpenAI-compatible dialect used by OpenRouter, MiniMax, Together, Groq, vLLM, Ollama's /openai endpoint, etc., or chrome-builtin for Chrome's on-device model (Prompt API / Gemini Nano — no baseUrl or key).",
       example: `provider: {
   kind: "openai-compatible",
   baseUrl: "https://api.MiniMax.chat/v1",

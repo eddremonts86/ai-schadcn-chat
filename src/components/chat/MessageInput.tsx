@@ -528,9 +528,62 @@ function ModelSwitcher({
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const providers = useMemo(() => (open ? listProviders() : []), [open]);
+  // Reachability of self-hosted providers, probed live while the menu is open.
+  const [localStatus, setLocalStatus] = useState<Record<string, "up" | "down">>({});
+
+  // Providers pointing at a self-hosted server (Ollama, LM Studio, a proxy
+  // path). They ship with a placeholder key so they look "configured", but
+  // nothing works unless that server is actually running.
+  const isLocalProvider = (p: ProviderProfile) =>
+    /(localhost|127\.0\.0\.1|0\.0\.0\.0)/.test(p.baseUrl) || p.baseUrl.startsWith("/");
+
+  // While the menu is open, ping each local server's /models endpoint so we
+  // only list the ones that actually respond. Cross-origin targets use
+  // no-cors (a resolved opaque response still proves the socket is live);
+  // same-origin proxy paths can read the real status.
+  useEffect(() => {
+    if (!open) {
+      setLocalStatus({});
+      return;
+    }
+    const locals = providers.filter(isLocalProvider);
+    if (locals.length === 0) return;
+    let cancelled = false;
+    const controllers: AbortController[] = [];
+    for (const p of locals) {
+      const ctrl = new AbortController();
+      controllers.push(ctrl);
+      const timer = setTimeout(() => ctrl.abort(), 1500);
+      const url = `${p.baseUrl.replace(/\/+$/, "")}/models`;
+      const probe = p.baseUrl.startsWith("/")
+        ? fetch(url, { method: "GET", signal: ctrl.signal }).then(
+            (r) => r.ok || r.status === 401 || r.status === 403,
+          )
+        : fetch(url, { method: "GET", mode: "no-cors", signal: ctrl.signal }).then(() => true);
+      probe
+        .catch(() => false)
+        .then((up) => {
+          clearTimeout(timer);
+          if (!cancelled) setLocalStatus((s) => ({ ...s, [p.id]: up ? "up" : "down" }));
+        });
+    }
+    return () => {
+      cancelled = true;
+      for (const c of controllers) c.abort();
+    };
+  }, [open, providers]);
 
   const f = filter.toLowerCase();
+  // Only surface providers you can actually use right now: ones with a key,
+  // the key-less on-device kind, or whichever is currently active (so the
+  // live selection is never hidden). Local providers must also be reachable.
+  const isUsable = (p: ProviderProfile) => {
+    if (p.id === activeProviderId) return true;
+    if (isLocalProvider(p)) return localStatus[p.id] === "up";
+    return p.kind === "chrome-builtin" || Boolean(p.apiKey);
+  };
   const groups = providers
+    .filter(isUsable)
     .map((p) => ({
       provider: p,
       models: p.models.filter(
@@ -580,11 +633,27 @@ function ModelSwitcher({
                 <p className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                   <span className="text-sm leading-none">{provider.icon}</span>
                   {provider.name}
-                  {!provider.apiKey && (
+                  {!provider.apiKey && provider.kind !== "chrome-builtin" && (
                     <span className="rounded bg-muted px-1 text-[8px] normal-case text-muted-foreground/70">
                       no key
                     </span>
                   )}
+                  {isLocalProvider(provider) &&
+                    (localStatus[provider.id] === "up" ? (
+                      <span
+                        title="Reachable local server"
+                        className="rounded bg-emerald-500/15 px-1 text-[8px] normal-case text-emerald-500/90"
+                      >
+                        local
+                      </span>
+                    ) : (
+                      <span
+                        title="Local server not responding — start it and set the URL before use"
+                        className="rounded bg-amber-500/15 px-1 text-[8px] normal-case text-amber-500/90"
+                      >
+                        offline
+                      </span>
+                    ))}
                 </p>
                 {models.map((m) => {
                   const active =
