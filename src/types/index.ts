@@ -30,7 +30,7 @@ import type { TypesetPreset } from "./chat.js";
 /**
  * Canonical list of available typeset presets. Re-exported from the package
  * root so consumers can iterate / type-check without hardcoding the strings.
- * The CSS rules for each preset live in `ai-schadcn-chat/typeset.css`.
+ * The CSS rules for each preset live in `@edd_remonts/ai-schadcn-chat/typeset.css`.
  */
 export const TYPESET_PRESETS = [
   "default",

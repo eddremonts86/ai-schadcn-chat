@@ -1,6 +1,6 @@
 /**
  * Public React hooks. Re-exports from the JSX provider file so consumers
- * import a single entry point: `import { useChat } from "ai-schadcn-chat/hooks"`.
+ * import a single entry point: `import { useChat } from "@edd_remonts/ai-schadcn-chat/hooks"`.
  */
 export {
   ChatProvider,

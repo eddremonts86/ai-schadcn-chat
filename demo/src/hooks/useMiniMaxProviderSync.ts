@@ -5,7 +5,7 @@ import {
   saveProvider,
   seedProviders,
   setActiveProviderId,
-} from "ai-schadcn-chat";
+} from "@edd_remonts/ai-schadcn-chat";
 
 /**
  * Keeps the package's built-in provider manager in sync with the

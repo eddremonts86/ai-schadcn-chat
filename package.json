@@ -1,5 +1,5 @@
 {
-  "name": "ai-schadcn-chat",
+  "name": "@edd_remonts/ai-schadcn-chat",
   "version": "0.2.0",
   "description": "A fully-featured, deeply configurable AI chat panel for React 18/19 — works with any Anthropic / OpenAI / OpenAI-compatible API (OpenRouter, MiniMax, etc.)",
   "type": "module",

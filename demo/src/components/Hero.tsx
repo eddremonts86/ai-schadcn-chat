@@ -1,6 +1,6 @@
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
-import { Button, Markdown } from "ai-schadcn-chat/components";
+import { Button, Markdown } from "@edd_remonts/ai-schadcn-chat/components";
 import { HERO_CONTENT, INSTALL_COMMAND, QUICK_START_SNIPPET, REPO_URL } from "../content/site";
 import { useScrollToId } from "../hooks/useScrollToId";
 

@@ -4,11 +4,11 @@
  * Pick a surface that fits your need:
  *
  *   // One-shot: complete chat panel.
- *   import { ChatPanel, defaultConfig } from "ai-schadcn-chat";
+ *   import { ChatPanel, defaultConfig } from "@edd_remonts/ai-schadcn-chat";
  *   <ChatPanel config={defaultConfig()} />
  *
  *   // Build your own layout.
- *   import { ChatProvider, useChat, ChatHeader, MessageList, ChatComposer } from "ai-schadcn-chat";
+ *   import { ChatProvider, useChat, ChatHeader, MessageList, ChatComposer } from "@edd_remonts/ai-schadcn-chat";
  *   <ChatProvider config={cfg}>
  *     <ChatHeader />
  *     <MessageList />
@@ -16,7 +16,7 @@
  *   </ChatProvider>
  *
  *   // Pure framework-agnostic engine (no React).
- *   import { ChatEngine, createProvider } from "ai-schadcn-chat/lib";
+ *   import { ChatEngine, createProvider } from "@edd_remonts/ai-schadcn-chat/lib";
  */
 
 export * from "./types/index.js";

@@ -7,8 +7,8 @@ import "./globals.css";
 // presets (chat, docs, reading, compact, large) at runtime. Both files
 // are optional; consumers who don't set config.ui.typeset still get the
 // legacy `ai-prose` look.
-import "ai-schadcn-chat/typeset.css";
-import "ai-schadcn-chat/typeset-presets.css";
+import "@edd_remonts/ai-schadcn-chat/typeset.css";
+import "@edd_remonts/ai-schadcn-chat/typeset-presets.css";
 
 const rootEl = document.getElementById("root");
 if (!rootEl) {

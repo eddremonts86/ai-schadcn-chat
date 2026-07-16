@@ -1,6 +1,6 @@
 /**
  * Public barrel — exports every component consumers can import from
- * `ai-schadcn-chat/components`.
+ * `@edd_remonts/ai-schadcn-chat/components`.
  *
  * The chat sub-namespace is built on top of the official shadcn
  * `radix-rhea` blocks (Message / Bubble / Attachment / Marker /
