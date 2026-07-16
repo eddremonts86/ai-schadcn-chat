@@ -556,9 +556,13 @@ function ModelSwitcher({
       const timer = setTimeout(() => ctrl.abort(), 1500);
       const url = `${p.baseUrl.replace(/\/+$/, "")}/models`;
       const probe = p.baseUrl.startsWith("/")
-        ? fetch(url, { method: "GET", signal: ctrl.signal }).then(
-            (r) => r.ok || r.status === 401 || r.status === 403,
-          )
+        ? fetch(url, { method: "GET", signal: ctrl.signal }).then((r) => {
+            // A real model server needs auth (401/403) or returns JSON. A
+            // static/SPA host answers this path with a 200 HTML fallback —
+            // don't mistake that for a running server.
+            if (r.status === 401 || r.status === 403) return true;
+            return r.ok && (r.headers.get("content-type") ?? "").includes("json");
+          })
         : fetch(url, { method: "GET", mode: "no-cors", signal: ctrl.signal }).then(() => true);
       probe
         .catch(() => false)
