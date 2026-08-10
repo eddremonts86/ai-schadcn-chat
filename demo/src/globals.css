@@ -19,85 +19,96 @@
    * the whole identity; neutrals are tinted toward it instead of pure gray.
    */
   :root {
-    --background: 0.99 0.004 285;
-    --foreground: 0.21 0.03 285;
+    /* Type system — display grotesk + geist body + geist mono. */
+    --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: "Space Grotesk", "Geist", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono", Menlo,
+      Consolas, monospace;
 
-    --card: 1 0 0;
-    --card-foreground: 0.21 0.03 285;
+    /* Subtle film grain, composited as a background layer (no DOM, no z-index). */
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 
-    --popover: 1 0 0;
-    --popover-foreground: 0.21 0.03 285;
+    /* Warm editorial: paper + ink neutrals (hue ~78), one terracotta accent. */
+    --background: 0.985 0.006 78;
+    --foreground: 0.24 0.014 62;
 
-    --primary: 0.56 0.225 280;
-    --primary-foreground: 0.99 0.01 280;
+    --card: 0.998 0.004 80;
+    --card-foreground: 0.24 0.014 62;
 
-    --secondary: 0.965 0.012 285;
-    --secondary-foreground: 0.30 0.03 285;
+    --popover: 0.998 0.004 80;
+    --popover-foreground: 0.24 0.014 62;
 
-    --muted: 0.965 0.008 285;
-    --muted-foreground: 0.515 0.025 285;
+    --primary: 0.565 0.15 45;
+    --primary-foreground: 0.99 0.012 80;
 
-    --accent: 0.95 0.022 285;
-    --accent-foreground: 0.30 0.04 285;
+    --secondary: 0.955 0.009 78;
+    --secondary-foreground: 0.32 0.014 62;
 
-    --destructive: 0.585 0.22 25;
-    --destructive-foreground: 0.99 0.01 25;
+    --muted: 0.955 0.007 78;
+    --muted-foreground: 0.505 0.016 62;
 
-    --success: 0.62 0.16 155;
+    --accent: 0.945 0.022 60;
+    --accent-foreground: 0.32 0.02 55;
 
-    --border: 0.91 0.012 285;
-    --input: 0.91 0.012 285;
-    --ring: 0.56 0.225 280;
+    --destructive: 0.585 0.20 27;
+    --destructive-foreground: 0.99 0.01 27;
 
-    --radius: 0.9rem;
+    --success: 0.58 0.11 150;
 
-    /* Accent ramp used by gradients / glows. */
-    --primary-2: 0.58 0.20 320; /* magenta-violet partner for gradients */
-    --glow: 0.60 0.22 285;
+    --border: 0.90 0.009 78;
+    --input: 0.90 0.009 78;
+    --ring: 0.565 0.15 45;
+
+    --radius: 0.75rem;
+
+    /* Accent ramp used by gradients / glows — same warm family, no magenta. */
+    --primary-2: 0.55 0.155 32; /* deeper clay partner for gradients */
+    --glow: 0.60 0.14 45;
 
     /* Chat-specific tokens. */
-    --chat-user: 0.56 0.225 280;
-    --chat-assistant: 1 0 0;
-    --chat-system: 0.75 0.16 70;
+    --chat-user: 0.565 0.15 45;
+    --chat-assistant: 0.998 0.004 80;
+    --chat-system: 0.72 0.13 70;
   }
 
   .dark {
-    --background: 0.165 0.018 285;
-    --foreground: 0.96 0.008 285;
+    --background: 0.205 0.008 65;
+    --foreground: 0.95 0.006 80;
 
-    --card: 0.205 0.022 285;
-    --card-foreground: 0.96 0.008 285;
+    --card: 0.245 0.01 65;
+    --card-foreground: 0.95 0.006 80;
 
-    --popover: 0.205 0.024 285;
-    --popover-foreground: 0.96 0.008 285;
+    --popover: 0.245 0.012 65;
+    --popover-foreground: 0.95 0.006 80;
 
-    --primary: 0.66 0.205 280;
-    --primary-foreground: 0.16 0.02 285;
+    --primary: 0.66 0.145 48;
+    --primary-foreground: 0.20 0.02 60;
 
-    --secondary: 0.26 0.028 285;
-    --secondary-foreground: 0.96 0.008 285;
+    --secondary: 0.29 0.012 65;
+    --secondary-foreground: 0.95 0.006 80;
 
-    --muted: 0.25 0.025 285;
-    --muted-foreground: 0.72 0.02 285;
+    --muted: 0.28 0.011 65;
+    --muted-foreground: 0.72 0.014 78;
 
-    --accent: 0.31 0.04 285;
-    --accent-foreground: 0.97 0.01 285;
+    --accent: 0.33 0.025 55;
+    --accent-foreground: 0.96 0.01 60;
 
-    --destructive: 0.64 0.20 25;
-    --destructive-foreground: 0.98 0.01 25;
+    --destructive: 0.64 0.19 27;
+    --destructive-foreground: 0.98 0.01 27;
 
-    --success: 0.70 0.16 155;
+    --success: 0.68 0.13 150;
 
-    --border: 0.30 0.03 285;
-    --input: 0.30 0.03 285;
-    --ring: 0.66 0.205 280;
+    --border: 0.32 0.012 65;
+    --input: 0.32 0.012 65;
+    --ring: 0.66 0.145 48;
 
-    --primary-2: 0.64 0.19 320;
-    --glow: 0.66 0.22 285;
+    --primary-2: 0.60 0.15 32;
+    --glow: 0.64 0.15 45;
 
-    --chat-user: 0.66 0.205 280;
-    --chat-assistant: 0.205 0.022 285;
-    --chat-system: 0.78 0.15 70;
+    --chat-user: 0.66 0.145 48;
+    --chat-assistant: 0.245 0.01 65;
+    --chat-system: 0.76 0.13 70;
   }
 }
 
@@ -117,10 +128,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Inter var", ui-sans-serif, system-ui, -apple-system,
-      BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-      "Noto Sans", sans-serif;
-    font-feature-settings: "cv11", "ss01";
+    font-family: var(--font-sans);
     font-optical-sizing: auto;
   }
 }
@@ -137,38 +145,40 @@
   .app-mesh {
     background-color: oklch(var(--background));
     background-image:
+      var(--grain),
       radial-gradient(
-        ellipse 70% 55% at 12% -8%,
-        oklch(var(--primary) / 0.12),
+        ellipse 75% 55% at 10% -10%,
+        oklch(var(--primary) / 0.07),
         transparent 60%
       ),
       radial-gradient(
-        ellipse 55% 50% at 105% 8%,
-        oklch(var(--primary-2) / 0.1),
+        ellipse 55% 50% at 108% 6%,
+        oklch(var(--primary-2) / 0.06),
         transparent 55%
       ),
       radial-gradient(
-        ellipse 60% 45% at 50% 115%,
-        oklch(var(--primary) / 0.07),
-        transparent 60%
+        ellipse 60% 45% at 50% 118%,
+        oklch(var(--primary) / 0.045),
+        transparent 62%
       );
-    background-attachment: fixed;
+    background-attachment: fixed, fixed, fixed, fixed;
   }
   .dark .app-mesh {
     background-image:
+      var(--grain),
       radial-gradient(
         ellipse 70% 55% at 12% -8%,
-        oklch(var(--primary) / 0.2),
+        oklch(var(--primary) / 0.16),
         transparent 60%
       ),
       radial-gradient(
         ellipse 55% 50% at 105% 8%,
-        oklch(var(--primary-2) / 0.16),
+        oklch(var(--primary-2) / 0.12),
         transparent 55%
       ),
       radial-gradient(
         ellipse 60% 45% at 50% 115%,
-        oklch(var(--primary) / 0.12),
+        oklch(var(--primary) / 0.09),
         transparent 60%
       );
   }
@@ -217,13 +227,13 @@
   /* Glow halo for the primary action / live states. */
   .glow-primary {
     box-shadow:
-      0 6px 16px -6px oklch(var(--glow) / 0.55),
-      0 2px 6px -2px oklch(var(--glow) / 0.4);
+      0 6px 18px -8px oklch(var(--glow) / 0.35),
+      0 2px 6px -3px oklch(var(--glow) / 0.28);
   }
   .glow-primary-strong {
     box-shadow:
-      0 0 0 1px oklch(var(--primary) / 0.4),
-      0 8px 28px -6px oklch(var(--glow) / 0.7);
+      0 0 0 1px oklch(var(--primary) / 0.28),
+      0 10px 30px -8px oklch(var(--glow) / 0.45);
   }
 
   /* Animated conic ring used around the assistant avatar while streaming. */
