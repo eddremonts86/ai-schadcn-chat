@@ -1,8 +1,10 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy } from "lucide";
 import { useState } from "react";
 import { Button, Markdown } from "@edd_remonts/ai-schadcn-chat/components";
+import { cn } from "@edd_remonts/ai-schadcn-chat/lib";
 import { HERO_CONTENT, INSTALL_COMMAND, QUICK_START_SNIPPET, REPO_URL } from "../content/site";
 import { useScrollToId } from "../hooks/useScrollToId";
+import { Morph } from "./MorphIcon";
 
 export function Hero() {
   const scrollToId = useScrollToId();
@@ -41,11 +43,15 @@ export function Hero() {
               className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border/70 bg-card/60 px-4 py-2.5 font-mono text-sm text-foreground/90 transition-colors hover:border-primary/40 sm:w-auto"
             >
               <span>{INSTALL_COMMAND}</span>
-              {copied ? (
-                <Check className="size-3.5 shrink-0 text-success" />
-              ) : (
-                <Copy className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-              )}
+              <Morph
+                icon={copied ? Check : Copy}
+                className={cn(
+                  "size-3.5 shrink-0 transition-colors",
+                  copied
+                    ? "text-success"
+                    : "text-muted-foreground group-hover:text-foreground",
+                )}
+              />
             </button>
 
             <div className="flex w-full items-center gap-2 sm:w-auto">

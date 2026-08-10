@@ -1,7 +1,9 @@
 import { useState, type ReactElement } from "react";
-import { Check, ChevronDown, Copy } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { Check, Copy } from "lucide";
 import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@edd_remonts/ai-schadcn-chat/components";
 import type { ConfigField as ConfigFieldEntry } from "../content/config-reference";
+import { Morph } from "./MorphIcon";
 
 /**
  * One collapsible card per documented config field. Layout:
@@ -149,17 +151,8 @@ function CopyButton({ text }: { text: string }): ReactElement {
       className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       aria-label={copied ? "Copied" : "Copy example"}
     >
-      {copied ? (
-        <>
-          <Check className="size-3" />
-          copied
-        </>
-      ) : (
-        <>
-          <Copy className="size-3" />
-          copy
-        </>
-      )}
+      <Morph icon={copied ? Check : Copy} className="size-3" />
+      {copied ? "copied" : "copy"}
     </button>
   );
 }

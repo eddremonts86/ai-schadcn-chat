@@ -1,4 +1,6 @@
-import { GithubIcon, Menu, Package, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { GithubIcon, Package, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide";
 import {
   Button,
   DropdownMenu,
@@ -8,9 +10,11 @@ import {
 } from "@edd_remonts/ai-schadcn-chat/components";
 import { NAV_LINKS, NPM_URL, REPO_URL } from "../content/site";
 import { useScrollToId } from "../hooks/useScrollToId";
+import { Morph } from "./MorphIcon";
 
 export function SiteNav() {
   const scrollToId = useScrollToId();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55">
@@ -61,7 +65,7 @@ export function SiteNav() {
           </Button>
 
           {/* Mobile: nav links + npm/GitHub collapse into one menu. */}
-          <DropdownMenu>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
@@ -69,7 +73,7 @@ export function SiteNav() {
                 aria-label="Open menu"
                 className="text-muted-foreground hover:text-foreground sm:hidden"
               >
-                <Menu className="size-4" />
+                <Morph icon={menuOpen ? X : Menu} className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
