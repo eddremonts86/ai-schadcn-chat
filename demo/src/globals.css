@@ -215,6 +215,17 @@
       0 16px 40px -18px oklch(var(--primary) / 0.35);
   }
 
+  /* A single organic accent shape peeking behind the floating code preview —
+   * the "prop" a product photo would sit on, without faking real UI. */
+  .blob-accent {
+    background: oklch(var(--primary) / 0.16);
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    filter: blur(2px);
+  }
+  .dark .blob-accent {
+    background: oklch(var(--primary) / 0.26);
+  }
+
   /* The brand gradient — used on the user bubble + primary action. */
   .grad-primary {
     background-image: linear-gradient(
