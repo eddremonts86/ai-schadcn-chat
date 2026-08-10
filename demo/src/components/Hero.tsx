@@ -40,7 +40,7 @@ export function Hero() {
             <button
               type="button"
               onClick={copyInstall}
-              className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border/70 bg-card/60 px-4 py-2.5 font-mono text-sm text-foreground/90 transition-colors hover:border-primary/40 sm:w-auto"
+              className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border/70 bg-card/60 px-4 py-2.5 font-mono text-sm text-foreground/90 transition hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100 sm:w-auto"
             >
               <span>{INSTALL_COMMAND}</span>
               <Morph

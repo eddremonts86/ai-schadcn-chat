@@ -148,7 +148,7 @@ function CopyButton({ text }: { text: string }): ReactElement {
     <button
       type="button"
       onClick={onCopy}
-      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100"
       aria-label={copied ? "Copied" : "Copy example"}
     >
       <Morph icon={copied ? Check : Copy} className="size-3" />
