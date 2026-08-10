@@ -140,6 +140,8 @@
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
     "jsdom": "^29.1.1",
+    "lucide": "1.31.0",
+    "morphicons": "1.6.0",
     "postcss": "^8.5.16",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
