@@ -1,5 +1,7 @@
 import { MessageCircle, X } from "lucide-react";
+import { MessageCircle as MessageCircleData, X as XData } from "lucide";
 import { ChatPanel } from "@edd_remonts/ai-schadcn-chat";
+import { Morph } from "./MorphIcon";
 import type { ChatConfig } from "@edd_remonts/ai-schadcn-chat";
 import { Button } from "@edd_remonts/ai-schadcn-chat/components";
 import { cn } from "@edd_remonts/ai-schadcn-chat/lib";
@@ -64,7 +66,7 @@ export function SupportWidget({ config }: { config: ChatConfig }) {
         aria-label={widget.isOpen ? "Close support chat" : "Ask about this library"}
         className="fixed bottom-5 right-5 z-40 size-14 rounded-full p-0 shadow-2xl transition-transform glow-primary-strong hover:scale-105"
       >
-        {widget.isOpen ? <X className="size-5" /> : <MessageCircle className="size-5" />}
+        <Morph icon={widget.isOpen ? XData : MessageCircleData} className="size-5" />
       </Button>
     </>
   );
