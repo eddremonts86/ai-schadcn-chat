@@ -27,7 +27,7 @@ export function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
         <div className="text-center lg:text-left">
           <h1 className="text-balance font-display text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-6xl lg:text-[4.25rem]">
             {HERO_CONTENT.headline}
@@ -35,10 +35,6 @@ export function Hero() {
 
             <p className="mx-auto mt-5 max-w-xl text-pretty text-base text-muted-foreground sm:text-lg lg:mx-0">
               {HERO_CONTENT.subheadline}
-            </p>
-
-            <p className="mx-auto mt-4 max-w-xl text-pretty text-xs text-muted-foreground/70 sm:text-sm lg:mx-0">
-              {HERO_CONTENT.providersLine}
             </p>
 
             <button

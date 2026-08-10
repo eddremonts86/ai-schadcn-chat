@@ -29,7 +29,7 @@ export function ConfigReference(): ReactElement {
       aria-labelledby="config-reference-title"
       className="border-t border-border/60 px-4 py-16 sm:px-6 sm:py-24"
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
             <ScrollText className="size-3.5" />
