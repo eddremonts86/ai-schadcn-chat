@@ -4,7 +4,7 @@ import { NPM_URL, REPO_URL } from "../content/site";
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60 px-4 py-10 sm:px-6">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground sm:flex-row">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground sm:flex-row">
         <p>MIT License · ai-schadcn-chat</p>
         <div className="flex items-center gap-4">
           <a

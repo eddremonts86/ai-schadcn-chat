@@ -50,9 +50,28 @@ export interface FeatureItem {
   featured?: boolean;
 }
 
-/** The three concrete import paths behind the "Three surfaces" feature —
- * rendered as code chips inside its featured panel. */
-export const THREE_SURFACES = ["<ChatPanel />", "<ChatProvider /> + <MessageList /> + <ChatComposer />", "ChatEngine"];
+/** The three concrete ways to consume the package — real, syntactically valid
+ * snippets (matching README.md's own usage examples), not a fake "A + B + C"
+ * concatenation. Rendered as actual code blocks inside the featured panel. */
+export interface Surface {
+  code: string;
+  note: string;
+}
+
+export const THREE_SURFACES: Surface[] = [
+  {
+    code: `<ChatPanel config={config} />`,
+    note: "Instant, full UI",
+  },
+  {
+    code: `<ChatProvider config={config}>\n  <MessageList />\n  <ChatComposer />\n</ChatProvider>`,
+    note: "Custom layout, same state",
+  },
+  {
+    code: `const engine = new ChatEngine(config);`,
+    note: "Framework-agnostic, no React",
+  },
+];
 
 export const FEATURES: FeatureItem[] = [
   {
