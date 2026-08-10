@@ -71,6 +71,8 @@ export default defineConfig({
       "@radix-ui/react-switch",
       "@radix-ui/react-tabs",
       "lucide-react",
+      "lucide",
+      "morphicons/react",
       "sonner",
       "react-markdown",
       "remark-gfm",
