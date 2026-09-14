@@ -1,6 +1,6 @@
 {
   "name": "@edd_remonts/ai-schadcn-chat",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "packageManager": "pnpm@11.10.0",
   "description": "A fully-featured, deeply configurable AI chat panel for React 18/19 \u2014 works with any Anthropic / OpenAI / OpenAI-compatible API (OpenRouter, MiniMax, etc.)",
   "type": "module",
@@ -71,7 +71,8 @@
     "./typeset.css": "./dist/typeset.css",
     "./typeset-presets.css": "./dist/typeset-presets.css",
     "./scroller.css": "./dist/styles/scroller.css",
-    "./marker.css": "./dist/styles/marker.css"
+    "./marker.css": "./dist/styles/marker.css",
+    "./surfaces.css": "./dist/styles/surfaces.css"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

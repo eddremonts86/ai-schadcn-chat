@@ -43,6 +43,8 @@ const srcStylesPath = resolve(rootDir, "src/styles/typeset.css");
 const srcTypesetPresetsPath = resolve(rootDir, "src/styles/typeset-presets.css");
 const srcScrollerPath = resolve(rootDir, "src/styles/scroller.css");
 const srcMarkerPath = resolve(rootDir, "src/styles/marker.css");
+const srcSurfacesPath = resolve(rootDir, "src/styles/surfaces.css");
+const distSurfacesPath = resolve(distStylesDir, "surfaces.css");
 
 const DESIRED = {
   type: "module",
@@ -127,6 +129,22 @@ async function main() {
     console.log(`postbuild: copied ${srcMarkerPath} -> ${distMarkerPath}`);
   } catch (err) {
     console.error(`postbuild: failed to copy marker.css: ${err.message}`);
+    process.exit(1);
+  }
+
+  // The chat components reference .surface-elevated / .surface-tinted. They
+  // lived only in the demo, so every other consumer got unstyled bubbles.
+  // Append them to the bundled stylesheet and ship them as a subpath too.
+  try {
+    await copyFile(srcSurfacesPath, distSurfacesPath);
+    const surfaces = await readFile(srcSurfacesPath, "utf8");
+    const bundled = await readFile(distStylesPath, "utf8");
+    if (!bundled.includes(".surface-tinted")) {
+      await writeFile(distStylesPath, `${bundled}\n${surfaces}`, "utf8");
+    }
+    console.log(`postbuild: appended surfaces.css to ${distStylesPath}`);
+  } catch (err) {
+    console.error(`postbuild: failed to add surfaces.css: ${err.message}`);
     process.exit(1);
   }
 
