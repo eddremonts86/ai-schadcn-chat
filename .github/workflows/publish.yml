@@ -5,10 +5,11 @@ name: Publish to npm
 # package.json — the workflow checks this before publishing so a mistagged
 # release fails fast instead of shipping the wrong version.
 #
-# Credentials come from npm Trusted Publishing: npm verifies a short-lived
-# OIDC token minted by GitHub for this workflow, so there is no secret to
-# store, rotate or leak. The package must have a trusted publisher registered
-# on npmjs.com naming this repository and this workflow file.
+# `id-token: write` is in place and provenance is signed on every publish, so
+# the OIDC half of Trusted Publishing works. The write itself still uses the
+# NPM_TOKEN secret: npm returns 404 on the PUT until a trusted publisher is
+# registered for this package on npmjs.com naming this repository and this
+# workflow file. Once it is, the NPM_TOKEN block below can go.
 #
 # pnpm comes from the `packageManager` field so CI uses the version that wrote
 # pnpm-lock.yaml; a mismatch there is the usual cause of --frozen-lockfile
@@ -78,14 +79,25 @@ jobs:
       # trusted publisher registered for the package on npmjs.com naming this
       # repository and this workflow file.
       #
-      # No token is written at all, so a green run here is proof the trusted
-      # publisher is doing the work. --provenance records where the tarball was
-      # built, which OIDC makes possible.
+      # --provenance records where the tarball was built; that part works
+      # already, because it only needs the OIDC token GitHub mints here. The
+      # credential for the write itself still comes from NPM_TOKEN until a
+      # trusted publisher is registered on npmjs.com for this package.
       #
       # Publishing with pnpm is deliberately avoided — it routes the version
       # through npm's staging area while reporting "Published", which is what
       # made 0.2.1 unusable.
       - name: Publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm install -g npm@latest
+          # OIDC alone was tried and the registry answered 404 on the PUT while
+          # happily signing provenance: GitHub mints the identity, but npm only
+          # accepts it once a trusted publisher is registered for the package.
+          # Until that exists the token has to be present, so it is written to
+          # the project .npmrc, which wins over the userconfig setup-node writes.
+          if [ -n "$NPM_TOKEN" ]; then
+            printf '\n//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" >> .npmrc
+          fi
           npm publish --access public --provenance
