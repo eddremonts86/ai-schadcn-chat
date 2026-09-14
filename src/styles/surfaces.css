@@ -1,0 +1,44 @@
+/*
+ * The two surfaces the chat is built out of: the assistant's card and the
+ * user's own bubble.
+ *
+ * These used to live only in demo/src/globals.css, so every consumer other
+ * than the demo rendered bubbles with no background, no border and no shadow —
+ * the shape was right and nothing else was.
+ *
+ * Written with color-mix against complete color tokens (`--primary: oklch(...)`),
+ * which is the shadcn v4 convention and therefore what consumers actually have.
+ * The demo predates it and stores bare `L C H` triples; its own definitions come
+ * later in its own stylesheet and keep winning there.
+ */
+
+.surface-elevated {
+  background-color: var(--card);
+  border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, var(--foreground) 4%, transparent),
+    0 12px 32px -12px color-mix(in oklch, var(--primary) 18%, transparent);
+}
+
+.surface-tinted {
+  background-color: color-mix(in oklch, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in oklch, var(--primary) 22%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, var(--foreground) 4%, transparent),
+    0 12px 32px -14px color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+.dark .surface-elevated {
+  border-color: color-mix(in oklch, white 8%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, black 40%, transparent),
+    0 16px 40px -16px color-mix(in oklch, var(--primary) 30%, transparent);
+}
+
+.dark .surface-tinted {
+  background-color: color-mix(in oklch, var(--primary) 18%, transparent);
+  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, black 40%, transparent),
+    0 16px 40px -18px color-mix(in oklch, var(--primary) 35%, transparent);
+}
