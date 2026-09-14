@@ -75,7 +75,16 @@ jobs:
             exit 1
           fi
 
+      # The token is written literally, not through setup-node's
+      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` placeholder: pnpm
+      # does not expand environment variables in .npmrc, so it sent the literal
+      # `${NODE_AUTH_TOKEN}` string and published unauthenticated. npm answers
+      # an unauthenticated PUT on an existing package with 404, not 401, which
+      # is why this looked like a permissions problem for three runs.
       - name: Publish
-        run: pnpm publish --no-git-checks --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pnpm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          pnpm whoami
+          pnpm publish --no-git-checks --access public
