@@ -1,12 +1,17 @@
 name: Publish to npm
 
 # Publishes the package to npm when a GitHub Release is published, or on a
-# manual dispatch. The release tag (e.g. v0.2.0) must match the version in
-# package.json — the workflow verifies this before publishing so a mistagged
+# manual dispatch. The release tag (e.g. v0.2.1) must match the version in
+# package.json — the workflow checks this before publishing so a mistagged
 # release fails fast instead of shipping the wrong version.
 #
-# Requires the NPM_TOKEN repository secret (npm automation token with publish
-# rights). Node 20 matches the Dockerfile build environment.
+# Requires the NPM_TOKEN repository secret: an npm automation token with
+# publish rights on @edd_remonts. Without it the run stops at the auth check
+# with an explanation rather than a bare ENEEDAUTH from the registry.
+#
+# pnpm comes from the `packageManager` field so CI uses the version that wrote
+# pnpm-lock.yaml; a mismatch there is the usual cause of --frozen-lockfile
+# failing only in CI.
 
 on:
   release:
@@ -23,12 +28,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
@@ -47,6 +50,30 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm build
+
+      # `build` ends with verify-dist, but run it on its own so a packaging
+      # regression is reported as its own failed step rather than buried in
+      # the build log.
+      - run: pnpm verify:dist
+
+      - name: Check the version is not already on npm
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          NAME="$(node -p "require('./package.json').name")"
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "::error::$NAME@$VERSION is already published — bump the version first."
+            exit 1
+          fi
+          echo "$NAME@$VERSION is not on npm yet."
+
+      - name: Check the npm token is present
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "::error::The NPM_TOKEN repository secret is not set. Create an npm automation token with publish rights on @edd_remonts, then run: gh secret set NPM_TOKEN"
+            exit 1
+          fi
 
       - name: Publish
         run: pnpm publish --no-git-checks --access public
