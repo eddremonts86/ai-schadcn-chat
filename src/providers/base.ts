@@ -164,6 +164,42 @@ function toHttpError(status: number, body: string): ChatError {
   };
 }
 
+/**
+ * Classify an error that arrives inside the stream rather than as an HTTP
+ * status. Providers put their own vocabulary in `type`/`code` —
+ * "rate_limit_exceeded", "invalid_api_key", "invalid_params" — and passing
+ * those through untouched leaves the UI with an unrecognised code and only its
+ * generic fallback to show, even though it has a written explanation for
+ * exactly this case.
+ */
+export function toStreamError(raw: {
+  message?: string;
+  type?: string;
+  code?: string;
+}): ChatError {
+  const hint = `${raw.code ?? ""} ${raw.type ?? ""} ${raw.message ?? ""}`.toLowerCase();
+  const has = (...needles: string[]) => needles.some((n) => hint.includes(n));
+
+  const code: ChatError["code"] = has("rate_limit", "rate limit", "quota", "429")
+    ? "rate_limit"
+    : has("invalid_api_key", "unauthorized", "forbidden", "authentication", "401", "403")
+      ? "auth"
+      : has("context_length", "context length", "too many tokens", "maximum context")
+        ? "context_overflow"
+        : has("invalid_request", "invalid_params", "invalid params", "bad_request", "400")
+          ? "bad_request"
+          : has("internal", "server_error", "overloaded", "500", "502", "503")
+            ? "server"
+            : "unknown";
+
+  return {
+    code,
+    message: raw.message ?? "Upstream error",
+    retryable: code === "rate_limit" || code === "server",
+    cause: raw,
+  };
+}
+
 function toParseError(message: string): ChatError {
   return { code: "parse", message, retryable: false };
 }

@@ -182,9 +182,33 @@ describe("OpenAIProvider — SSE parsing", () => {
     }
     const errored = chunks.find(
       (c) => (c as { error?: { message?: string } }).error,
-    ) as { error: { message: string } } | undefined;
+    ) as { error: { message: string; code: string; retryable: boolean } } | undefined;
     expect(errored).toBeDefined();
     expect(errored!.error.message).toContain("rate limit reached");
+    // Classified, not passed through: the UI has written copy for rate_limit
+    // and would otherwise fall back to its generic message.
+    expect(errored!.error.code).toBe("rate_limit");
+    expect(errored!.error.retryable).toBe(true);
+  });
+
+  it("classifies the provider's own error vocabulary", async () => {
+    const classify = async (raw: Record<string, string>) => {
+      const chunks: unknown[] = [];
+      for await (const c of streamOf([`data: ${JSON.stringify({ error: raw })}\n\n`])) {
+        chunks.push(c);
+      }
+      return (chunks.find((c) => (c as { error?: unknown }).error) as {
+        error: { code: string };
+      }).error.code;
+    };
+
+    expect(await classify({ message: "x", code: "invalid_api_key" })).toBe("auth");
+    expect(await classify({ message: "x", type: "invalid_params" })).toBe("bad_request");
+    expect(await classify({ message: "maximum context length exceeded" })).toBe(
+      "context_overflow",
+    );
+    expect(await classify({ message: "x", type: "server_error" })).toBe("server");
+    expect(await classify({ message: "something odd" })).toBe("unknown");
   });
 
   it("reports an error frame that arrives after partial content", async () => {
