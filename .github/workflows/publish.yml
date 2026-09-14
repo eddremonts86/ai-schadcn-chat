@@ -75,16 +75,21 @@ jobs:
             exit 1
           fi
 
-      # The token is written literally, not through setup-node's
-      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` placeholder: pnpm
-      # does not expand environment variables in .npmrc, so it sent the literal
-      # `${NODE_AUTH_TOKEN}` string and published unauthenticated. npm answers
-      # an unauthenticated PUT on an existing package with 404, not 401, which
-      # is why this looked like a permissions problem for three runs.
+      # The token is appended to the PROJECT .npmrc, which wins over the
+      # userconfig that actions/setup-node writes. Two things had to be got
+      # right here:
+      #  - pnpm does not expand environment variables in .npmrc, so setup-node's
+      #    `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` reached the
+      #    registry as that literal string and every publish went out
+      #    unauthenticated. npm answers an unauthenticated PUT on an existing
+      #    package with 404 rather than 401, so it read as a permissions problem.
+      #  - `pnpm config set` writes pnpm's own config file, which is not the
+      #    npmrc pnpm then reads for auth, so it did not help either.
+      # `pnpm whoami` runs first so an auth failure says so directly.
       - name: Publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          printf '\n//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" >> .npmrc
           pnpm whoami
           pnpm publish --no-git-checks --access public
