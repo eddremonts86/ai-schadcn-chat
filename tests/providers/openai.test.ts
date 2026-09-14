@@ -169,6 +169,42 @@ describe("OpenAIProvider — SSE parsing", () => {
     );
   });
 
+  it("surfaces an error frame instead of ending the stream silently", async () => {
+    // A rate limit, an unknown model or a dropped upstream arrives as a frame
+    // carrying only `error`. It used to match no branch, so the stream ended
+    // with no content and no error: an empty assistant bubble.
+    const chunks: unknown[] = [];
+    for await (const c of streamOf([
+      'data: {"error":{"message":"429 Token Plan rate limit reached","type":"rate_limit_exceeded","code":"rate_limit_exceeded"}}\n\n',
+      "data: [DONE]\n\n",
+    ])) {
+      chunks.push(c);
+    }
+    const errored = chunks.find(
+      (c) => (c as { error?: { message?: string } }).error,
+    ) as { error: { message: string } } | undefined;
+    expect(errored).toBeDefined();
+    expect(errored!.error.message).toContain("rate limit reached");
+  });
+
+  it("reports an error frame that arrives after partial content", async () => {
+    const chunks: unknown[] = [];
+    for await (const c of streamOf([
+      'data: {"choices":[{"delta":{"content":"partial"}}]}\n\n',
+      'data: {"error":{"message":"upstream closed"}}\n\n',
+    ])) {
+      chunks.push(c);
+    }
+    expect(chunks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ delta: "partial" }),
+        expect.objectContaining({
+          error: expect.objectContaining({ message: expect.stringContaining("upstream closed") }),
+        }),
+      ]),
+    );
+  });
+
   it("extracts tool_calls", async () => {
     const chunks: unknown[] = [];
     for await (const c of streamOf([

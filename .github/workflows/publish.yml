@@ -20,6 +20,9 @@ on:
 
 permissions:
   contents: read
+  # Required for Trusted Publishing: npm verifies a short-lived OIDC token
+  # minted by GitHub for this workflow instead of a long-lived secret.
+  id-token: write
 
 jobs:
   publish:
@@ -66,35 +69,39 @@ jobs:
           fi
           echo "$NAME@$VERSION is not on npm yet."
 
-      - name: Check the npm token is present
+      # Not fatal any more: Trusted Publishing is the primary credential and
+      # needs no secret. This only records which path the run will take, so a
+      # later failure is easy to read.
+      - name: Report the credential path
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NPM_TOKEN" ]; then
-            echo "::error::The NPM_TOKEN repository secret is not set. Create an npm automation token with publish rights on @edd_remonts, then run: gh secret set NPM_TOKEN"
-            exit 1
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "NPM_TOKEN is set; it will be used if OIDC is unavailable."
+          else
+            echo "No NPM_TOKEN. Publishing relies on Trusted Publishing (OIDC)."
+            echo "If that fails, register a trusted publisher for this package on npmjs.com"
+            echo "naming eddremonts86/ai-schadcn-chat and .github/workflows/publish.yml."
           fi
 
-      # The token is appended to the PROJECT .npmrc, which wins over the
-      # userconfig that actions/setup-node writes. Two things had to be got
-      # right here:
-      #  - pnpm does not expand environment variables in .npmrc, so setup-node's
-      #    `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` reached the
-      #    registry as that literal string and every publish went out
-      #    unauthenticated. npm answers an unauthenticated PUT on an existing
-      #    package with 404 rather than 401, so it read as a permissions problem.
-      #  - `pnpm config set` writes pnpm's own config file, which is not the
-      #    npmrc pnpm then reads for auth, so it did not help either.
-      # Published with npm, not pnpm: pnpm sends the version to npm's staging
-      # area and still reports "Published", which left 0.2.1 in a state the
-      # registry refuses to publish over (409 "Cannot publish over previously
-      # staged version") while the Staged Packages page shows nothing to
-      # promote. That version number is unusable; npm publishes directly.
-      # `npm whoami` runs first so an auth failure says so directly.
+      # Trusted Publishing. npm mints the credential from this workflow's OIDC
+      # identity, so there is no token to store, rotate or leak — which also
+      # sidesteps npm removing direct publish from bypass-2FA granular tokens
+      # in January 2027. Requires `id-token: write` above, npm 11.5.1+, and a
+      # trusted publisher registered for the package on npmjs.com naming this
+      # repository and this workflow file.
+      #
+      # NPM_TOKEN stays wired as a fallback: if the secret is present it is
+      # written to the project .npmrc, and npm uses it when OIDC is unavailable.
+      # Publishing with pnpm is deliberately avoided — it routes the version
+      # through npm's staging area while reporting "Published", which is what
+      # made 0.2.1 unusable.
       - name: Publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          printf '\n//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" >> .npmrc
-          npm whoami
+          npm install -g npm@latest
+          if [ -n "$NPM_TOKEN" ]; then
+            printf '\n//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" >> .npmrc
+          fi
           npm publish --access public

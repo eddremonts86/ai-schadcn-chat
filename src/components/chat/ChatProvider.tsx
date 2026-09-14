@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -69,14 +70,20 @@ export function ChatProvider(props: ChatProviderProps): ReactNode {
     engineRef.current = new ChatEngineImpl(props.config);
   }
 
-  // Whenever the `config` prop changes, sync it into the engine.
-  // We compare by JSON to avoid spurious updates that would still
-  // trigger a re-render through the subscription.
+  // Whenever the `config` prop changes, sync it into the engine — from an
+  // effect, not from render. `updateConfig` ends in `emit()`, which notifies
+  // every useSyncExternalStore subscriber, so doing it during render updates
+  // other components mid-render: React logs "Cannot update a component while
+  // rendering a different component" and the store read can tear.
+  //
+  // Compared shallowly because callers routinely build the object inline or in
+  // a useMemo, so the identity changes without the contents changing.
   const configRef = useRef<ChatConfig>(props.config);
-  if (!shallowEqual(configRef.current, props.config)) {
+  useEffect(() => {
+    if (shallowEqual(configRef.current, props.config)) return;
     configRef.current = props.config;
-    engineRef.current.updateConfig(props.config);
-  }
+    engineRef.current!.updateConfig(props.config);
+  }, [props.config]);
 
   // useSyncExternalStore requires the subscribe callback to be stable
   // across renders — otherwise React tears down + recreates the
