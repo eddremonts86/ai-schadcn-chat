@@ -10,6 +10,7 @@ import {
   normalizePrompt,
   readSseStream,
   toChatError,
+  toStreamError,
 } from "./base.js";
 
 /**
@@ -106,9 +107,7 @@ export class OpenAIProvider extends BaseProviderAdapter {
       // stream just ended: the user got an empty assistant bubble with no
       // indication that anything had gone wrong.
       if (e.error) {
-        const err = new Error(e.error.message ?? "Upstream error");
-        (err as Error & { code?: string }).code = e.error.code ?? e.error.type;
-        yield errorChunk(toChatError(err));
+        yield errorChunk(toStreamError(e.error));
         continue;
       }
 

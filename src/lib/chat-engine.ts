@@ -463,7 +463,11 @@ export class ChatEngine {
     for await (const chunk of stream) {
       if (chunk.error) {
         lastError = chunk.error;
-        buffer += chunk.error.message ? `\n\n[error] ${chunk.error.message}` : "";
+        // Not appended to `buffer`: the error travels on `message.error` and
+        // the UI renders it as a card with the provider's own text behind
+        // "Technical details". Writing it into the content as well showed it
+        // twice, and left a bubble whose only content was "[error] ..." when
+        // the failure arrived before any tokens.
         finishReason = "error";
         break;
       }
