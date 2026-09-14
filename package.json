@@ -1,7 +1,7 @@
 {
   "name": "@edd_remonts/ai-schadcn-chat",
-  "version": "0.2.0",
-  "description": "A fully-featured, deeply configurable AI chat panel for React 18/19 — works with any Anthropic / OpenAI / OpenAI-compatible API (OpenRouter, MiniMax, etc.)",
+  "version": "0.2.1",
+  "description": "A fully-featured, deeply configurable AI chat panel for React 18/19 \u2014 works with any Anthropic / OpenAI / OpenAI-compatible API (OpenRouter, MiniMax, etc.)",
   "type": "module",
   "license": "MIT",
   "author": "ed <eddremonts86@gmail.com>",
@@ -44,27 +44,27 @@
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js",
-      "require": "./dist/components/index.cjs"
+      "require": "./dist/components.cjs"
     },
     "./hooks": {
       "types": "./dist/hooks/index.d.ts",
       "import": "./dist/hooks/index.js",
-      "require": "./dist/hooks/index.cjs"
+      "require": "./dist/hooks.cjs"
     },
     "./providers": {
       "types": "./dist/providers/index.d.ts",
       "import": "./dist/providers/index.js",
-      "require": "./dist/providers/index.cjs"
+      "require": "./dist/providers.cjs"
     },
     "./lib": {
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/lib/index.js",
-      "require": "./dist/lib/index.cjs"
+      "require": "./dist/lib.cjs"
     },
     "./types": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.js",
-      "require": "./dist/types/index.cjs"
+      "require": "./dist/types.cjs"
     },
     "./styles.css": "./dist/styles.css",
     "./typeset.css": "./dist/typeset.css",
@@ -83,7 +83,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "demo": "vite --config demo/vite.config.ts",
-    "build": "vite build && tsc -p tsconfig.build.json && node ./scripts/postbuild.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node ./scripts/postbuild.mjs && node ./scripts/verify-dist.mjs",
     "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly --outDir dist",
     "lint": "oxlint",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -92,8 +92,9 @@
     "test:e2e": "playwright test",
     "test:watch": "vitest",
     "demo:og-assets": "node scripts/generate-demo-og-assets.mjs",
-    "prepare": "vite build && tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run typecheck && npm run test:unit && npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm run test:unit && npm run build",
+    "verify:dist": "node ./scripts/verify-dist.mjs"
   },
   "peerDependencies": {
     "react": "^18.3.0 || ^19.0.0",

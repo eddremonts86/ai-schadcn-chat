@@ -114,7 +114,7 @@ async function main() {
   // source tree. Keeping the CSS under dist/styles/ matches the source
   // shape at src/styles/ so the relative path is correct in both build
   // and consumption modes.
-  mkdir(distStylesDir, { recursive: true });
+  await mkdir(distStylesDir, { recursive: true });
   try {
     await copyFile(srcScrollerPath, distScrollerPath);
     console.log(`postbuild: copied ${srcScrollerPath} -> ${distScrollerPath}`);
