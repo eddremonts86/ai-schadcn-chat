@@ -96,7 +96,22 @@ export class OpenAIProvider extends BaseProviderAdapter {
         yield errorChunk(toChatError(err));
         continue;
       }
-      const e = parsed as OpenAIEvent;
+      const e = parsed as OpenAIEvent & {
+        error?: { message?: string; type?: string; code?: string };
+      };
+
+      // OpenAI-compatible endpoints report a mid-stream failure as a frame
+      // carrying only `error` — a rate limit, an unknown model, a dropped
+      // upstream. Without this the frame matched no branch below and the
+      // stream just ended: the user got an empty assistant bubble with no
+      // indication that anything had gone wrong.
+      if (e.error) {
+        const err = new Error(e.error.message ?? "Upstream error");
+        (err as Error & { code?: string }).code = e.error.code ?? e.error.type;
+        yield errorChunk(toChatError(err));
+        continue;
+      }
+
       model = e.model ?? model;
       if (e.usage) {
         usage = {
