@@ -6,18 +6,18 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": resolve(__dirname, "src"),
+      "@": resolve(import.meta.dirname, "src"),
     },
   },
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        components: resolve(__dirname, "src/components/index.ts"),
-        hooks: resolve(__dirname, "src/hooks/index.ts"),
-        providers: resolve(__dirname, "src/providers/index.ts"),
-        lib: resolve(__dirname, "src/lib/index.ts"),
-        types: resolve(__dirname, "src/types/index.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        components: resolve(import.meta.dirname, "src/components/index.ts"),
+        hooks: resolve(import.meta.dirname, "src/hooks/index.ts"),
+        providers: resolve(import.meta.dirname, "src/providers/index.ts"),
+        lib: resolve(import.meta.dirname, "src/lib/index.ts"),
+        types: resolve(import.meta.dirname, "src/types/index.ts"),
       },
       formats: ["es", "cjs"],
       fileName: (format, entryName) =>
@@ -49,8 +49,12 @@ export default defineConfig({
           "react/jsx-runtime": "jsxRuntime",
         },
         assetFileNames: (assetInfo) => {
-          // `exports["./styles.css"]` and the README both name it styles.css.
-          if (assetInfo.name === "style.css") return "styles.css";
+          // Vite 5 called the bundled stylesheet style.css; Vite 8 names it
+          // after the package. cssCodeSplit is false, so there is exactly one
+          // — pin it to the name exports["./styles.css"] and the README
+          // promise, whatever the bundler decides to call it.
+          const name = assetInfo.names?.[0] ?? assetInfo.name ?? "";
+          if (name.endsWith(".css")) return "styles.css";
           return "assets/[name][extname]";
         },
       },

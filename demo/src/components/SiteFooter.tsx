@@ -1,4 +1,5 @@
-import { GithubIcon, Package } from "lucide-react";
+import { Package } from "lucide-react";
+import { GithubIcon } from "./icons/GithubIcon";
 import { NPM_URL, REPO_URL } from "../content/site";
 
 export function SiteFooter() {
