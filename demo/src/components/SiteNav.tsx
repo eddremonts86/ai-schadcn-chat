@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { GithubIcon, Package, Sparkles } from "lucide-react";
+import { Package, Sparkles } from "lucide-react";
+import { GithubIcon } from "./icons/GithubIcon";
 import { Menu, X } from "lucide";
 import {
   Button,
