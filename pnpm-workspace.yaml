@@ -27,3 +27,9 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - esbuild
   - '@tailwindcss/oxide'
+# pnpm 11 decides from allowBuilds; without it esbuild stayed in the
+# ignored list and `pnpm install --frozen-lockfile` failed on a clean
+# checkout. esbuild's postinstall links its platform binary.
+allowBuilds:
+  esbuild: true
+  '@tailwindcss/oxide': true
