@@ -14,17 +14,21 @@
 # Layer size ~30 MB.
 # -----------------------------------------------------------------------------
 
-ARG NODE_VERSION=20-bookworm-slim
+ARG NODE_VERSION=22-bookworm-slim
 
 FROM node:${NODE_VERSION} AS build
 WORKDIR /app
 
-# pnpm via corepack. Pinned so a fresh corepack release does not move
-# the version under us.
+# pnpm via corepack, pinned to match package.json's "packageManager" —
+# Corepack reads that field from the project manifest and uses it over
+# whatever `corepack prepare --activate` set globally, so the two drifting
+# (this used to say 9.15.0 against a package.json pinned to 11.10.0) meant
+# `pnpm install` silently re-resolved 11.10.0 here regardless, which needs
+# Node >=22.13 and fails outright on the 20.x this image used to pin.
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
-RUN corepack prepare pnpm@9.15.0 --activate
+RUN corepack prepare pnpm@11.10.0 --activate
 
 # Copy manifests and lockfile first so this layer caches across
 # rebuilds that only change source code.
